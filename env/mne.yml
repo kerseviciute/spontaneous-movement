@@ -1,0 +1,12 @@
+name: mne
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python
+  - numpy
+  - mne 1.5.1
+  - matplotlib
+  - scipy
+  - jupyter
+  - snakemake 7.32.4
