@@ -5,3 +5,10 @@ samplingRate: 20_000 # Hz
 filter:
   drop_below: 20
   drop_above: 500
+
+movement:
+  tkeoMaxFreq: 10 # Hz
+  tkeoThreshold: 0.015
+  minEventLength: 0.1 # seconds
+  minEventBreak: 0.1 # seconds
+  expandBy: 0.1 # seconds

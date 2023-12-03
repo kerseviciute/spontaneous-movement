@@ -9,6 +9,9 @@ with open('.create_mne.py.pkl', 'wb') as file:
 # with open('.create_mne.py.pkl', 'rb') as file:
 #     snakemake = pickle.load(file)
 
+with open(f'{snakemake.scriptdir}/methods.py', 'r') as file:
+    exec(file.read())
+
 # Read raw data
 with open(snakemake.input['raw'], 'r') as file:
     data = np.array(list(csv.reader(file, delimiter = '\t')))
@@ -25,5 +28,4 @@ data = data[1:, :].transpose()
 info = mne.create_info(ch_names = channels, sfreq = sfreq, ch_types = ch_types)
 raw = mne.io.RawArray(data, info)
 
-with open(snakemake.output['raw'], 'wb') as file:
-    pickle.dump(raw, file)
+save_pickle(raw, snakemake.output['raw'])
