@@ -1,3 +1,6 @@
 .idea
 raw
 .ipynb_checkpoints
+.snakemake
+output
+.*.pkl
