@@ -4,7 +4,7 @@ samplingRate: 20_000 # Hz
 
 filter:
   drop_below: 20
-  drop_above: 500
+  drop_above:
 
 movement:
   tkeoMaxFreq: 10 # Hz
