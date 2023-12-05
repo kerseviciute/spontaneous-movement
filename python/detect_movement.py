@@ -49,6 +49,7 @@ for channel in tke.ch_names:
     events.append(channel_events)
 
 events = pd.concat(events, ignore_index = True)
+events['EventId'] = [f'Event{x}' for x in range(len(events))]
 
 print(f'Detected {len(events)} movements through all the channels')
 
