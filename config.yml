@@ -8,7 +8,11 @@ filter:
 
 movement:
   tkeoMaxFreq: 10 # Hz
-  tkeoThreshold: 0.015
+  tkeoThreshold: 0.013
   minEventLength: 0.1 # seconds
   minEventBreak: 0.1 # seconds
   expandBy: 0.1 # seconds
+
+  minMovementAmplitude: 0.5 # (detection filter)
+  minAmplitudeDifference: 0.25 # (quality filter)
+  calmTime: 0.25 # seconds

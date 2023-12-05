@@ -39,12 +39,16 @@ rule emg_detectMovement:
   input:
     filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl'
   output:
-    movement = 'output/{project}/{sid}/{cell}/emg/movement.pkl'
+    movement = 'output/{project}/{sid}/{cell}/emg/final_movement.pkl',
+    all = 'output/{project}/{sid}/{cell}/emg/all_movement.pkl'
   params:
     tkeoMaxFreq = config['movement']['tkeoMaxFreq'],
     threshold = config['movement']['tkeoThreshold'],
     minLength = config['movement']['minEventLength'],
     minBreak = config['movement']['minEventBreak'],
-    expandBy = config['movement']['expandBy']
+    expandBy = config['movement']['expandBy'],
+    minMovementAmplitude = config['movement']['minMovementAmplitude'],
+    minAmplitudeDifference = config['movement']['minAmplitudeDifference'],
+    calmTime = config['movement']['calmTime']
   conda: 'env/mne.yml'
   script: 'python/detect_movement.py'

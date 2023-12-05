@@ -81,10 +81,16 @@ def extract_events(tkeo, sampling_rate, threshold = 0.02, min_event_length = 0.1
 
     # Select only movement data
     movement_data = movement_data[movement_data['Movement']]
+    
+    # max_timepoint = len(tkeo)
 
     # Add expansion
     movement_data['EventStart'] = movement_data['EventStart'] - sampling_rate * expand_by
+    movement_data['EventStart'] = movement_data['EventStart'].apply(lambda x: 0 if x < 0 else x)
+    
     movement_data['EventEnd'] = movement_data['EventEnd'] + sampling_rate * expand_by
+    movement_data['EventEnd'] = movement_data['EventEnd'].apply(lambda x: x if x < len(tkeo) else len(tkeo))
+
     movement_data['EventLength'] = movement_data['EventEnd'] - movement_data['EventStart']
 
     # Convert to seconds
