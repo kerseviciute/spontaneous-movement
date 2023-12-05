@@ -43,13 +43,14 @@ for channel in tke.ch_names:
         min_break = min_break,
         expand_by = expand_by
     )
+
     channel_events['Channel'] = channel
+
     events.append(channel_events)
 
 events = pd.concat(events, ignore_index = True)
 
 print(f'Detected {len(events)} movements through all the channels')
-
 
 min_movement_amplitude = snakemake.params['minMovementAmplitude']
 min_amplitude_difference = snakemake.params['minAmplitudeDifference']
@@ -64,11 +65,11 @@ for i, event in events.iterrows():
     start = event['Start']
     end = event['End']
     channel = event['Channel']
-    
+
     # Calculate signal amplitude during the event
     event_data = data.copy().pick(picks = [channel]).crop(tmin = start, tmax = end)
     events.at[i, 'Amplitude'] = np.sqrt(np.mean(np.square(event_data.get_data()[0])))
-    
+
     # Calculate signal amplitude before the event
     before_start = start - calm_time if start - calm_time >= 0 else 0
     if before_start == start:
@@ -76,7 +77,7 @@ for i, event in events.iterrows():
     else:
         before_event = data.copy().pick(picks = [channel]).crop(tmin = before_start, tmax = start)
         events.at[i, 'AmplitudeBefore'] = np.sqrt(np.mean(np.square(before_event.get_data()[0])))
-    
+
     # Calculate signal amplitude after the event
     after_end = end + calm_time if end + calm_time <= np.max(data.times) else np.max(data.times)
     if after_end == end:
@@ -86,21 +87,28 @@ for i, event in events.iterrows():
         events.at[i, 'AmplitudeAfter'] = np.sqrt(np.mean(np.square(after_event.get_data()[0])))
 
 
-def mean_amplitude(row):
+def mean_amplitude_diff(row):
     if np.isnan(row['AmplitudeBefore']):
         return row['Amplitude'] - row['AmplitudeAfter']
+
     if np.isnan(row['AmplitudeAfter']):
         return row['Amplitude'] - row['AmplitudeBefore']
+
     return (2 * row['Amplitude'] - row['AmplitudeAfter'] - row['AmplitudeBefore']) / 2
 
 
-events['AmplitudeDiff'] = events.apply(mean_amplitude, axis = 1)
-
+events['MeanAmplitudeDiff'] = events.apply(mean_amplitude_diff, axis = 1)
 
 save_pickle(events, snakemake.output['all'])
 
+# Filter based on amplitude
 events = events[events['Amplitude'] >= min_movement_amplitude]
-events = events[events['AmplitudeDiff'] >= min_amplitude_difference]
+events = events[events['MeanAmplitudeDiff'] >= min_amplitude_difference]
+
+# Drop events that start at the very beginning or end at the very end of the recording
+events = events[events['Start'] != 0.0]
+events = events[events['End'] != np.max(data.times)]
+
 events = events.reset_index(drop = True)
 
 print(f'Events after filtering: {len(events)}')
