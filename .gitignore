@@ -4,3 +4,4 @@ raw
 .snakemake
 output
 .*.pkl
+.DS_Store
