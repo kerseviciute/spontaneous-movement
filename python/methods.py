@@ -42,7 +42,7 @@ def calculate_tkeo(data, h_freq = 20):
 
 
 def extract_events(tkeo, sampling_rate, threshold = 0.02, min_event_length = 0.1, min_break = 0.05,
-                   expand_by: float = 0.0):
+                   expand_by: float = 0.0, extract_movement = True):
     """
     Extracts events by analysing a single channel TKEO.
 
@@ -53,6 +53,7 @@ def extract_events(tkeo, sampling_rate, threshold = 0.02, min_event_length = 0.1
     - min_event_length (float): minimum event length, in seconds.
     - min_break (float): minimum time period between two movement events, in seconds. If the movements are separated by a shorter calm phase, they will be joined into a single event.
     - expand_by (float): movement start and end times will be expanded by specified time period, in seconds. Note, that overlapping events after time expansion are not merged.
+    - extract_movement (bool): whether movement or no movement events should be extracted.
 
     Returns:
     A pandas DataFrame with the movement periods.
@@ -80,9 +81,10 @@ def extract_events(tkeo, sampling_rate, threshold = 0.02, min_event_length = 0.1
     movement_data = movement_data[movement_data['EventLength'] >= min_points]
 
     # Select only movement data
-    movement_data = movement_data[movement_data['Movement']]
-    
-    # max_timepoint = len(tkeo)
+    if extract_movement:
+        movement_data = movement_data[movement_data['Movement']]
+    else:
+        movement_data = movement_data[~movement_data['Movement']]
 
     # Add expansion
     movement_data['EventStart'] = movement_data['EventStart'] - sampling_rate * expand_by

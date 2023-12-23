@@ -16,3 +16,9 @@ movement:
   minMovementAmplitude: 0.25 # (detection filter)
   minAmplitudeDifference: 0.1 # (quality filter)
   calmTime: 0.25 # seconds
+
+no_movement:
+  tkeoThreshold: 0.0015
+  minEventLength: 0.5 # seconds
+  minEventBreak: 0.1 # seconds
+  expandBy: -0.2 # seconds (will shorten the event by cutting the edges off)
