@@ -21,7 +21,9 @@ sfreq = snakemake.params['samplingRate']
 # Create MNE object
 channels = list(data[0, :])
 channels = [channel.replace("'", "") for channel in channels]
-ch_types = ['emg' for i in range(0, len(channels))]
+
+ch_type = snakemake.params['ch_type']
+ch_types = [ch_type for i in range(0, len(channels))]
 
 data = data[1:, :].transpose()
 

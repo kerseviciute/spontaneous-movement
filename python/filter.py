@@ -15,6 +15,7 @@ raw = read_pickle(snakemake.input['raw'])
 l_freq = snakemake.params['drop_below']
 h_freq = snakemake.params['drop_above']
 
-raw.filter(l_freq = l_freq, h_freq = h_freq, fir_design = 'firwin', picks = 'emg')
+ch_type = snakemake.params['ch_type']
+raw.filter(l_freq = l_freq, h_freq = h_freq, fir_design = 'firwin', picks = ch_type)
 
 save_pickle(raw, snakemake.output['filter'])

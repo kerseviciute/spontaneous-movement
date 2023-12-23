@@ -3,7 +3,8 @@ configfile: 'config.yml'
 
 rule all:
   input:
-    expand('output/{project}/W1/C1/emg/filter.pkl', project = config['project'])
+    expand('output/{project}/W1/C1/emg/filter.pkl', project = config['project']),
+    expand('output/{project}/W1/C1/vm/filter.pkl', project = config['project'])
 
 #
 # Convert the raw EMG .txt files to MNE objects for further processing.
@@ -14,7 +15,8 @@ rule emg_mne:
   output:
     raw = 'output/{project}/{sid}/{cell}/emg/raw.pkl'
   params:
-    samplingRate = config['samplingRate']
+    samplingRate = config['samplingRate'],
+    ch_type = 'emg'
   conda: 'env/mne.yml'
   script: 'python/create_mne.py'
 
@@ -27,8 +29,9 @@ rule emg_filter:
   output:
     filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl'
   params:
-    drop_below = config['filter']['drop_below'],
-    drop_above = config['filter']['drop_above']
+    drop_below = config['filter']['emg']['drop_below'],
+    drop_above = config['filter']['emg']['drop_above'],
+    ch_type = 'emg'
   conda: 'env/mne.yml'
   script: 'python/filter.py'
 
@@ -59,3 +62,32 @@ rule emg_detectMovement:
     expandBy_no_move = config['no_movement']['expandBy']
   conda: 'env/mne.yml'
   script: 'python/detect_movement.py'
+
+#
+# Convert the raw VM .txt files to MNE objects for further processing.
+#
+rule vm_mne:
+  input:
+    raw = 'raw/{sid}_{cell}_Vm_rest.txt'
+  output:
+    raw = 'output/{project}/{sid}/{cell}/vm/raw.pkl'
+  params:
+    samplingRate = config['samplingRate'],
+    ch_type = 'bio'
+  conda: 'env/mne.yml'
+  script: 'python/create_mne.py'
+
+#
+# Filter the VM data.
+#
+rule vm_filter:
+  input:
+    raw = 'output/{project}/{sid}/{cell}/vm/raw.pkl'
+  output:
+    filter = 'output/{project}/{sid}/{cell}/vm/filter.pkl'
+  params:
+    drop_below = config['filter']['vm']['drop_below'],
+    drop_above = config['filter']['vm']['drop_above'],
+    ch_type = 'bio'
+  conda: 'env/mne.yml'
+  script: 'python/filter.py'

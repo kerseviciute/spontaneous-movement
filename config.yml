@@ -3,8 +3,12 @@ project: spontaneous-movement
 samplingRate: 20_000 # Hz
 
 filter:
-  drop_below: 250
-  drop_above: 2000
+  emg:
+    drop_below: 250
+    drop_above: 2000
+  vm:
+    drop_below:
+    drop_above:
 
 movement:
   tkeoMaxFreq: 20 # Hz
