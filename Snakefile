@@ -3,8 +3,10 @@ configfile: 'config.yml'
 
 rule all:
   input:
-    expand('output/{project}/W1/C1/emg/filter.pkl', project = config['project']),
-    expand('output/{project}/W1/C1/vm/filter.pkl', project = config['project'])
+    expand('output/{project}/W1/C3/emg/filter.pkl', project = config['project']),
+    expand('output/{project}/W1/C3/vm/filter.pkl', project = config['project']),
+    expand('output/{project}/W1/C3/emg/all_no_movement.pkl', project = config['project']),
+    expand('output/{project}/W1/C3/emg/final_movement.pkl', project = config['project'])
 
 #
 # Convert the raw EMG .txt files to MNE objects for further processing.
