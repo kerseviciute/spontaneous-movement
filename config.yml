@@ -17,6 +17,11 @@ movement:
   minAmplitudeDifference: 0.1 # (quality filter)
   calmTime: 0.25 # seconds
 
+  # Comparing events vs rest
+  minAmplitudeDiff: 1.5
+  smoothWindowSize: 200
+  resampleFactor: 4
+
 no_movement:
   tkeoThreshold: 0.0015
   minEventLength: 0.5 # seconds

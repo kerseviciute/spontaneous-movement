@@ -73,7 +73,6 @@ for channel in tke.ch_names:
     channel_events_no_move['Channel'] = channel
     events_no_move.append(channel_events_no_move)
 
-
 #
 # Preprocess no movement events
 #
@@ -164,6 +163,45 @@ events_move = events_move.reset_index(drop = True)
 
 print(f'Events after filtering: {len(events_move)}')
 
-# TODO: afterwards, cut the expanded times for more precise movement detection
-
 save_pickle(events_move, snakemake.output['quality_movement'])
+
+amplitude_diff = snakemake.config['movement']['minAmplitudeDiff']
+min_move_amplitude = snakemake.config['movement']['minMovementAmplitude']
+min_event_length = snakemake.config['movement']['minEventLength']
+window_size = snakemake.config['movement']['smoothWindowSize']
+resample_factor = snakemake.config['movement']['resampleFactor']
+
+rest_amplitude = np.mean(events_no_move['Amplitude'])
+
+exact_time_events = []
+
+for i, event in events_move.iterrows():
+    exact_event = determine_exact_time(
+        event = event,
+        data = data,
+        rest_amplitude = rest_amplitude,
+        amplitude_diff = amplitude_diff,
+        min_move_amplitude = min_move_amplitude,
+        min_event_length = min_event_length,
+        window_size = window_size,
+        resample_factor = resample_factor,
+        verbose = False
+    )
+
+    exact_event['Channel'] = event['Channel']
+    exact_time_events.append(exact_event)
+
+exact_time_events = pd.concat(exact_time_events, ignore_index = True)
+
+for i, event in exact_time_events.iterrows():
+    start = event['Start']
+    end = event['End']
+    channel = event['Channel']
+
+    # Calculate signal amplitude during the event
+    event_data = data.copy().pick(picks = [channel]).crop(tmin = start, tmax = end)
+    exact_time_events.at[i, 'Amplitude'] = np.sqrt(np.mean(np.square(event_data.get_data()[0])))
+
+print(f'Events after determining exact onset/offset times: {len(exact_time_events)}')
+
+save_pickle(exact_time_events, snakemake.output['final_movement'])

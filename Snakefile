@@ -35,13 +35,15 @@ rule emg_filter:
 #
 # Analyse filtered EMG data and detect movement episodes.
 #
+# TODO: split movement detection and movement filtering into separate files
 rule emg_detectMovement:
   input:
     filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl'
   output:
-    quality_movement = 'output/{project}/{sid}/{cell}/emg/final_movement.pkl',
+    quality_movement = 'output/{project}/{sid}/{cell}/emg/quality_movement.pkl',
     all_movement = 'output/{project}/{sid}/{cell}/emg/all_movement.pkl',
-    all_no_movement = 'output/{project}/{sid}/{cell}/emg/all_no_movement.pkl'
+    all_no_movement = 'output/{project}/{sid}/{cell}/emg/all_no_movement.pkl',
+    final_movement = 'output/{project}/{sid}/{cell}/emg/final_movement.pkl'
   params:
     tkeoMaxFreq = config['movement']['tkeoMaxFreq'],
     threshold = config['movement']['tkeoThreshold'],
