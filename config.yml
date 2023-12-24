@@ -11,20 +11,40 @@ filter:
     drop_above:
 
 movement:
+  #
+  # Parameters for initial movement detection
+  #
+
   tkeoMaxFreq: 20 # Hz
   tkeoThreshold: 0.0025
   minEventLength: 0.1 # seconds
-  minEventBreak: 0.1 # seconds
-  expandBy: 0.2 # seconds
+  minEventBreak: 0.15 # seconds
+  expandBy: 0 # seconds
 
-  minMovementAmplitude: 0.25 # (detection filter)
-  minAmplitudeDifference: 0.1 # (quality filter)
-  calmTime: 0.25 # seconds
+  #
+  # Parameters for further detected movement event corrections and filtering
+  #
 
-  # Comparing events vs rest
-  minAmplitudeDiff: 1.5
-  smoothWindowSize: 200
+  # Required period with no signal before and after the event
+  calmTime: 0.2 # seconds
+  # Maximum allowed amplitude deviation from resting state amplitude is
+  # {calmAmplitudeDifference} times higher than the average no movement amplitude.
+  calmAmplitudeDifference: 2 # times
+
+  # Movement amplitude should be {amplitudeDifference} times higher than the
+  # maximum no movement amplitude.
+  amplitudeDifference: 2.5 # times
+
+  # Used for resampling the data during exact movement onset/offset detection
+  windowSize: 200
   resampleFactor: 4
+
+  # The maximum allowed time period between two events. If the time between two
+  # events is less than {max_merge_time} seconds, the events will be merged into one.
+  maxMergeTime: 0.1 # seconds
+
+  # Drop final events which are shorter than {minMovementTime} seconds
+  minMovementTime: 0.25 # seconds
 
 no_movement:
   tkeoThreshold: 0.0015

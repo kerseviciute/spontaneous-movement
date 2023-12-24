@@ -126,17 +126,18 @@ def merge_short(data, min_break = 200):
     return data
 
 
-def determine_exact_time(event, data, rest_amplitude, amplitude_diff = 1.5, min_move_amplitude = 0.25,
-                         min_event_length = 0.1, window_size = 200, resample_factor = 4, verbose = False):
+def determine_exact_time(event, data, rest_amplitude, expand_by = 0.25,
+                         window_size = 200, resample_factor = 4):
     import numpy as np
     import pandas as pd
 
     sfreq = data.info['sfreq']
 
     # Get event data
+    # Signal start and end times are expanded by a constant to ensure capturing the full event.
     channel = event['Channel']
-    event_start = np.max([event['Start'] - 0.25, 0])
-    event_end = np.min([event['End'] + 0.25, np.max(data.times)])
+    event_start = np.max([event['Start'] - expand_by, 0])
+    event_end = np.min([event['End'] + expand_by, np.max(data.times)])
 
     event_data = data.copy().pick(picks = [channel]).crop(tmin = event_start, tmax = event_end)
     y = event_data.get_data()[0]
@@ -145,11 +146,9 @@ def determine_exact_time(event, data, rest_amplitude, amplitude_diff = 1.5, min_
     y = y[::resample_factor]
     new_sfreq = int(sfreq / resample_factor)
 
-    if verbose: print(f'Obtained sampling rate: {new_sfreq} Hz')
-
     # Smooth the signal by rolling average
     smooth_y = np.convolve(np.abs(y), np.ones(window_size) / window_size, mode = 'same')
-    smooth_y = smooth_y - amplitude_diff * rest_amplitude
+    smooth_y = smooth_y - rest_amplitude
 
     # Find where the movement happens
     signal_over_threshold = smooth_y >= 0
@@ -166,25 +165,6 @@ def determine_exact_time(event, data, rest_amplitude, amplitude_diff = 1.5, min_
     movement_data['EventLength'] = list(movement_data['EventEnd'] - movement_data['EventStart'])
     movement_data = movement_data[movement_data['Movement']]
 
-    # Filter events by minimum time length
-    min_event_points = new_sfreq * min_event_length
-    movement_data = movement_data[movement_data['EventLength'] > min_event_points]
-    movement_data = movement_data.reset_index(drop = True)
-
-    if verbose: print(f'Number of estimated movements: {len(movement_data)}')
-
-    # Calculate the signal amplitude
-    if verbose: print('Calculating the average signal amplitude during estimated movements')
-    for index, movement in movement_data.iterrows():
-        start = movement['EventStart']
-        end = movement['EventEnd']
-        dt = smooth_y[start:end]
-        movement_data.at[index, 'Amplitude'] = np.sqrt(np.mean(np.square(dt)))
-
-    # Filter by amplitude
-    movement_data = movement_data[movement_data['Amplitude'] > min_move_amplitude]
-    movement_data = movement_data.reset_index(drop = True)
-
     # Recalculate the event start and end times as they are relative to the event start
     movement_data['Start'] = movement_data['EventStart'] / new_sfreq + event_start
     movement_data['Start'] = movement_data['Start'].apply(lambda x: 0 if x < 0 else x)
@@ -197,8 +177,6 @@ def determine_exact_time(event, data, rest_amplitude, amplitude_diff = 1.5, min_
     movement_data['EventStart'] = movement_data['Start'] * sfreq
     movement_data['EventEnd'] = movement_data['End'] * sfreq
     movement_data['EventLength'] = list(movement_data['EventEnd'] - movement_data['EventStart'])
-
-    if verbose: print(f'Number of estimated movements after amplitude filtering: {len(movement_data)}')
 
     return movement_data
 
@@ -222,5 +200,28 @@ def amplitude_all_events(events, data):
     amplitudes = []
     for i, event in events.iterrows():
         amplitudes.append(event_amplitude(event, data))
+
+    return amplitudes
+
+
+def around_event_amplitude(event, data, calm_time, before_event = True):
+    channel = event['Channel']
+
+    if before_event:
+        start = event['Start'] - calm_time
+        end = event['Start']
+    else:
+        start = event['End']
+        end = event['End'] + calm_time
+
+    event_data = data.copy().pick(picks = [channel]).crop(tmin = start, tmax = end).get_data()[0]
+
+    return signal_amplitude(event_data)
+
+
+def around_amplitude_all_events(events, data, calm_time, before_event = True):
+    amplitudes = []
+    for i, event in events.iterrows():
+        amplitudes.append(around_event_amplitude(event, data, calm_time, before_event))
 
     return amplitudes

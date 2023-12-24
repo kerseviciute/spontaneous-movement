@@ -5,7 +5,7 @@ rule all:
   input:
     expand('output/{project}/W1/C3/emg/filter.pkl', project = config['project']),
     expand('output/{project}/W1/C3/vm/filter.pkl', project = config['project']),
-    expand('output/{project}/W1/C3/emg/movement_events.pkl', project = config['project']),
+    expand('output/{project}/W1/C3/emg/filtered_movement_events.pkl', project = config['project']),
     expand('output/{project}/W1/C3/emg/no_movement_events.pkl', project = config['project'])
 
 #
@@ -40,31 +40,6 @@ rule emg_filter:
 #
 # Analyse filtered EMG data and detect movement episodes.
 #
-# TODO: split movement detection and movement filtering into separate files
-# rule emg_detectMovement:
-#   input:
-#     filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl'
-#   output:
-#     quality_movement = 'output/{project}/{sid}/{cell}/emg/quality_movement.pkl',
-#     all_movement = 'output/{project}/{sid}/{cell}/emg/all_movement.pkl',
-#     all_no_movement = 'output/{project}/{sid}/{cell}/emg/all_no_movement.pkl',
-#     final_movement = 'output/{project}/{sid}/{cell}/emg/final_movement.pkl'
-#   params:
-#     tkeoMaxFreq = config['movement']['tkeoMaxFreq'],
-#     threshold = config['movement']['tkeoThreshold'],
-#     minLength = config['movement']['minEventLength'],
-#     minBreak = config['movement']['minEventBreak'],
-#     expandBy = config['movement']['expandBy'],
-#     minMovementAmplitude = config['movement']['minMovementAmplitude'],
-#     minAmplitudeDifference = config['movement']['minAmplitudeDifference'],
-#     calmTime = config['movement']['calmTime'],
-#     threshold_no_move = config['no_movement']['tkeoThreshold'],
-#     minLength_no_move = config['no_movement']['minEventLength'],
-#     minBreak_no_move = config['no_movement']['minEventBreak'],
-#     expandBy_no_move = config['no_movement']['expandBy']
-#   conda: 'env/mne.yml'
-#   script: 'python/detect_movement.py'
-
 rule extract_events_move:
   input:
     filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl'
@@ -80,17 +55,30 @@ rule extract_events_move:
   conda: 'env/mne.yml'
   script: 'python/extract_events.py'
 
+#
+# Filter the movement episodes to keep only good quality data.
+#
 rule filter_events_move:
   input:
     filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl',
-    events = 'output/{project}/{sid}/{cell}/emg/movement_events.pkl'
+    movement = 'output/{project}/{sid}/{cell}/emg/movement_events.pkl',
+    no_movement = 'output/{project}/{sid}/{cell}/emg/no_movement_events.pkl'
   output:
-    events = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
+    movement = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
   params:
-    calmTime = config['movement']['calmTime']
+    amplitude_diff_times = config['movement']['amplitudeDifference'],
+    calm_time = config['movement']['calmTime'],
+    window_size = config['movement']['windowSize'],
+    resample_factor = config['movement']['resampleFactor'],
+    max_merge_time = config['movement']['maxMergeTime'],
+    calm_amplitude_difference = config['movement']['calmAmplitudeDifference'],
+    min_movement_time = config['movement']['minMovementTime']
   conda: 'env/mne.yml'
-  script: 'python/extract_events.py'
+  script: 'python/filter_events.py'
 
+#
+# Analyse filtered EMG data and detect no movement episodes.
+#
 rule extract_events_no_move:
   input:
     filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl'
