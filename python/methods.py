@@ -201,3 +201,26 @@ def determine_exact_time(event, data, rest_amplitude, amplitude_diff = 1.5, min_
     if verbose: print(f'Number of estimated movements after amplitude filtering: {len(movement_data)}')
 
     return movement_data
+
+
+def signal_amplitude(signal):
+    import numpy as np
+    return np.sqrt(np.mean(np.square(signal)))
+
+
+def event_amplitude(event, data):
+    start = event['Start']
+    end = event['End']
+    channel = event['Channel']
+
+    # Calculate signal amplitude during the event
+    event_data = data.copy().pick(picks = [channel]).crop(tmin = start, tmax = end)
+    return signal_amplitude(event_data.get_data()[0])
+
+
+def amplitude_all_events(events, data):
+    amplitudes = []
+    for i, event in events.iterrows():
+        amplitudes.append(event_amplitude(event, data))
+
+    return amplitudes
