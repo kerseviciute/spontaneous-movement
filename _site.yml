@@ -1,0 +1,19 @@
+name: spontaneous-movement
+navbar:
+  title: Spontaneous Movement
+  left:
+    - text: Home
+      icon: fa-home
+      href: index.html
+    - text: EMG Data Processing
+      menu:
+        - text: W1 C3
+          href: W1_C3_emg.html
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: true

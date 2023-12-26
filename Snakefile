@@ -94,6 +94,20 @@ rule extract_events_no_move:
   conda: 'env/mne.yml'
   script: 'python/extract_events.py'
 
+rule report_emg:
+  input:
+    raw = 'output/{project}/{sid}/{cell}/emg/raw.pkl',
+    data = 'output/{project}/{sid}/{cell}/emg/filter.pkl',
+    no_movement_filtered = 'output/{project}/{sid}/{cell}/emg/no_movement_events.pkl',
+    movement = 'output/{project}/{sid}/{cell}/emg/movement_events.pkl',
+    movement_filtered = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
+  output:
+    report = 'output/{project}/report/{sid}_{cell}_emg.html'
+  params:
+    script = 'emg.Rmd'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
 #
 # Convert the raw VM .txt files to MNE objects for further processing.
 #
