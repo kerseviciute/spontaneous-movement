@@ -4,7 +4,7 @@ navbar:
   left:
     - text: Home
       icon: fa-home
-      href: emg_index.html
+      href: index_emg.html
     - text: S1 L2/3
       menu:
         - text: W1 C1

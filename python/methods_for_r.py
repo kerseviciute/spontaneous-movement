@@ -7,7 +7,7 @@ def read_pickle(filename):
     return data
 
 
-def plot_all_events(data, movement = None, no_movement = None):
+def plot_all_events(data, movement = None, no_movement = None, limit = 4):
     from matplotlib import pyplot as plt
 
     figure, axes = plt.subplots(nrows = len(data.ch_names), figsize = (20, 0.5 * len(data.ch_names)))
@@ -26,7 +26,7 @@ def plot_all_events(data, movement = None, no_movement = None):
         y = data.get_data(picks = [i])[0]
 
         axes[i].plot(x, y, linewidth = 0.5, color = 'black')
-        axes[i].set_ylim(-4, 4)
+        axes[i].set_ylim(-limit, limit)
         axes[i].get_xaxis().set_ticks([])
         axes[i].get_yaxis().set_ticks([])
         axes[i].set_ylabel(channel, rotation = 0, labelpad = 60, loc = 'center')

@@ -3,8 +3,6 @@ import pandas as pd
 configfile: 'config.yml'
 
 samples = pd.read_csv(config['sample_sheet'])
-# TODO: for now, generate results for one data type only
-samples = samples[samples['Type'] == 'S1_L2/3']
 
 rule all:
   input:
@@ -14,8 +12,6 @@ rule all:
     )
 
 rule report_index:
-  input:
-    emg_report = 'output/{project}/report/index_emg.html'
   output:
     report = 'output/{project}/report/index.html'
   params:
@@ -44,6 +40,7 @@ rule report_emg:
     report = 'output/{project}/report/{sid}_{cell}_emg.html'
   params:
     script = 'reports/emg/emg.Rmd'
+  threads: 8 # best not to run in parallel (figures get mixed up)
   conda: 'env/r.yml'
   script: 'R/render.R'
 
@@ -81,6 +78,7 @@ rule emg_filter:
   params:
     drop_below = config['filter']['emg']['drop_below'],
     drop_above = config['filter']['emg']['drop_above'],
+    scale = config['filter']['emg']['scale'],
     ch_type = 'emg'
   conda: 'env/mne.yml'
   script: 'python/filter.py'
@@ -167,6 +165,7 @@ rule vm_filter:
   params:
     drop_below = config['filter']['vm']['drop_below'],
     drop_above = config['filter']['vm']['drop_above'],
+    scale = config['filter']['vm']['scale'],
     ch_type = 'bio'
   conda: 'env/mne.yml'
   script: 'python/filter.py'

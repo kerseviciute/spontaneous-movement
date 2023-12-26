@@ -49,6 +49,8 @@ no_movement_events = read_pickle(r.no_movement_filename)
 
 The EMG data were filtered to remove frequencies lower than `r config$filter$emg$drop_below` Hz
 and higher than `r config$filter$emg$drop_above` Hz. The symmetric linear-phase FIR filter was used.
+After filtering, the data were scaled using z-transform with the mean and standard deviations of the
+complete sample data.
 
 ```{python, include = TRUE, echo = FALSE}
 plot_all_events(raw)
@@ -57,7 +59,7 @@ plot_all_events(raw)
 **Figure 1.** EMG data before filtering.
 
 ```{python, include = TRUE, echo = FALSE}
-plot_all_events(data)
+plot_all_events(data, limit = 10)
 ```
 
 **Figure 2.** EMG data after filtering.
@@ -65,13 +67,13 @@ plot_all_events(data)
 ## Movement Event Detection
 
 ```{python, include = TRUE, echo = FALSE}
-plot_all_events(data, movement_unfiltered)
+plot_all_events(data, movement_unfiltered, limit = 10)
 ```
 
 **Figure 3.** All detected movement events.
 
 ```{python, include = TRUE, echo = FALSE}
-plot_all_events(data, movement_events, no_movement_events)
+plot_all_events(data, movement_events, no_movement_events, limit = 10)
 ```
 
 **Figure 4.** Good quality events after filtering. Good quality movement events are marked in **red**, good quality

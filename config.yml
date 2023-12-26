@@ -6,11 +6,13 @@ samplingRate: 20_000 # Hz
 
 filter:
   emg:
-    drop_below: 250
+    drop_below: 500
     drop_above: 2000
+    scale: True
   vm:
     drop_below:
     drop_above:
+    scale: False
 
 movement:
   #
@@ -18,24 +20,24 @@ movement:
   #
 
   tkeoMaxFreq: 20 # Hz
-  tkeoThreshold: 0.0025
+  tkeoThreshold: 0.1
   minEventLength: 0.1 # seconds
   minEventBreak: 0.15 # seconds
-  expandBy: 0 # seconds
+  expandBy: 0.1 # seconds
 
   #
   # Parameters for further detected movement event corrections and filtering
   #
 
   # Required period with no signal before and after the event
-  calmTime: 0.2 # seconds
+  calmTime: 0.1 # seconds
   # Maximum allowed amplitude deviation from resting state amplitude is
   # {calmAmplitudeDifference} times higher than the average no movement amplitude.
   calmAmplitudeDifference: 2 # times
 
   # Movement amplitude should be {amplitudeDifference} times higher than the
   # maximum no movement amplitude.
-  amplitudeDifference: 2.5 # times
+  amplitudeDifference: 2 # times
 
   # Used for resampling the data during exact movement onset/offset detection
   windowSize: 200
@@ -46,10 +48,12 @@ movement:
   maxMergeTime: 0.1 # seconds
 
   # Drop final events which are shorter than {minMovementTime} seconds
-  minMovementTime: 0.25 # seconds
+  minMovementTime: 0.5 # seconds
+  # Drop final events that have average amplitude lower than this threshold
+  minMovementAmplitude: 1 # TODO!!!!!!
 
 no_movement:
-  tkeoThreshold: 0.0015
+  tkeoThreshold: 0.025
   minEventLength: 0.5 # seconds
   minEventBreak: 0.1 # seconds
   expandBy: -0.2 # seconds (will shorten the event by cutting the edges off)
@@ -57,3 +61,4 @@ no_movement:
 report:
   pages:
     - index
+    - index_emg
