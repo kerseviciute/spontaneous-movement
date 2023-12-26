@@ -6,3 +6,7 @@ dependencies:
   - r-essentials 4.3
   - r-reticulate 1.34.0
   - r-rmarkdown 2.25
+  - r-dplyr 1.1.4
+  - r-data.table 1.14.10
+  - r-foreach 1.5.2
+  - r-openxlsx 4.2.5.2

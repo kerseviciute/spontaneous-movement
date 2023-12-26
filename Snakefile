@@ -8,6 +8,14 @@ rule all:
     expand('output/{project}/W1/C3/emg/filtered_movement_events.pkl', project = config['project']),
     expand('output/{project}/W1/C3/emg/no_movement_events.pkl', project = config['project'])
 
+rule sample_sheet:
+  input:
+    data = 'raw/cells patched_naive.xlsx'
+  output:
+    sample_sheet = 'sample_sheet.csv'
+  conda: 'env/r.yml'
+  script: 'R/sample_sheet.R'
+
 #
 # Convert the raw EMG .txt files to MNE objects for further processing.
 #
