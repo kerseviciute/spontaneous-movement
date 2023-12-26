@@ -1,0 +1,14 @@
+---
+date: <small>`r Sys.Date()`</small>
+author: <small>Ieva Kerseviciute</small>
+title: Spontaneous Movement
+---
+
+```{r, include = FALSE}
+# snakemake <- readRDS('.index.Rmd.RDS')
+```
+
+# Project summary
+
+- **EMG data preprocessing**. Information on EMG data preprocessing as well as the results for all individual
+  files can be reached [here](index_emg.html).

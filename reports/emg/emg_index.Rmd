@@ -1,0 +1,17 @@
+---
+date: <small>`r Sys.Date()`</small>
+author: <small>Ieva Kerseviciute</small>
+title: Spontaneous Movement
+---
+
+```{r, include = FALSE}
+# snakemake <- readRDS('.emg_index.Rmd.RDS')
+
+config <- snakemake@config
+
+```
+
+# EMG data preprocessing and movement event detection
+
+The EMG data were filtered to remove frequencies lower than `r config$filter$emg$drop_below` Hz
+and higher than `r config$filter$emg$drop_above` Hz. The symmetric linear-phase FIR filter was used.

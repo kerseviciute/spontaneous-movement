@@ -20,3 +20,4 @@ data <- rbind(
 head(data)
 
 fwrite(data, snakemake@output$sample_sheet)
+saveRDS(data, snakemake@output$samples)

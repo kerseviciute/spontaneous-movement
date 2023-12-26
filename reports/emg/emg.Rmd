@@ -7,8 +7,12 @@ author: <small>Ieva Kerseviciute</small>
 # snakemake <- readRDS('.emg.Rmd.RDS')
 library(reticulate)
 library(knitr)
+
 reticulate::use_condaenv('mne') # TODO: add PyQt5 to the environment
 knitr::knit_engines$set(python = reticulate::eng_python)
+
+setOption <- options
+setOption(knitr.graphics.rel_path = FALSE)
 
 scriptdir <- snakemake@scriptdir
 raw_filename <- snakemake@input$raw

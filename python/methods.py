@@ -205,14 +205,17 @@ def amplitude_all_events(events, data):
 
 
 def around_event_amplitude(event, data, calm_time, before_event = True):
+    import numpy as np
     channel = event['Channel']
 
     if before_event:
         start = event['Start'] - calm_time
+        start = np.max([np.min(data.times), start])
         end = event['Start']
     else:
         start = event['End']
         end = event['End'] + calm_time
+        end = np.min([end, np.max(data.times)])
 
     event_data = data.copy().pick(picks = [channel]).crop(tmin = start, tmax = end).get_data()[0]
 

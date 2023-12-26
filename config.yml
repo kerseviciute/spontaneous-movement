@@ -1,5 +1,7 @@
 project: spontaneous-movement
 
+sample_sheet: sample_sheet.csv
+
 samplingRate: 20_000 # Hz
 
 filter:
@@ -51,3 +53,7 @@ no_movement:
   minEventLength: 0.5 # seconds
   minEventBreak: 0.1 # seconds
   expandBy: -0.2 # seconds (will shorten the event by cutting the edges off)
+
+report:
+  pages:
+    - index

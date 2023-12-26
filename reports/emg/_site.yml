@@ -1,0 +1,107 @@
+name: spontaneous-movement
+navbar:
+  title: Spontaneous Movement
+  left:
+    - text: Home
+      icon: fa-home
+      href: emg_index.html
+    - text: S1 L2/3
+      menu:
+        - text: W1 C1
+          href: W1_C1_emg.html
+        - text: W1 C2
+          href: W1_C2_emg.html
+        - text: W1 C8
+          href: W1_C8_emg.html
+        - text: W2 C3
+          href: W2_C3_emg.html
+        - text: W2 C4
+          href: W2_C4_emg.html
+        - text: W2 C5
+          href: W2_C5_emg.html
+        - text: W2 C6
+          href: W2_C6_emg.html
+        - text: W3 C10
+          href: W3_C10_emg.html
+        - text: W3 C11
+          href: W3_C11_emg.html
+        - text: W4 C10
+          href: W4_C10_emg.html
+    - text: S1 L5
+      menu:
+        - text: W3 C12
+          href: W3_C12_emg.html
+        - text: W3 C13
+          href: W3_C13_emg.html
+        - text: W3 C14
+          href: W3_C14_emg.html
+        - text: W3 C15
+          href: W3_C15_emg.html
+        - text: W3 C16
+          href: W3_C16_emg.html
+        - text: W4 C11
+          href: W4_C11_emg.html
+        - text: W4 C12
+          href: W4_C12_emg.html
+        - text: W4 C13
+          href: W4_C13_emg.html
+        - text: W4 C14
+          href: W4_C14_emg.html
+        - text: W4 C15
+          href: W4_C15_emg.html
+    - text: M1 L2/3
+      menu:
+        - text: W1 C3
+          href: W1_C3_emg.html
+        - text: W1 C4
+          href: W1_C4_emg.html
+        - text: W1 C5
+          href: W1_C5_emg.html
+        - text: W1 C6
+          href: W1_C6_emg.html
+        - text: W2 C1
+          href: W2_C1_emg.html
+        - text: W2 C2
+          href: W2_C2_emg.html
+        - text: W3 C1
+          href: W3_C1_emg.html
+        - text: W3 C2
+          href: W3_C2_emg.html
+        - text: W3 C3
+          href: W3_C3_emg.html
+        - text: W3 C7
+          href: W3_C7_emg.html
+        - text: W4 C1
+          href: W4_C1_emg.html
+        - text: W4 C2
+          href: W4_C2_emg.html
+    - text: M1 L5
+      menu:
+        - text: W2 C7
+          href: W2_C7_emg.html
+        - text: W3 C4
+          href: W3_C4_emg.html
+        - text: W3 C5
+          href: W3_C5_emg.html
+        - text: W3 C6
+          href: W3_C6_emg.html
+        - text: W3 C8
+          href: W3_C8_emg.html
+        - text: W4 C3
+          href: W4_C3_emg.html
+        - text: W4 C4
+          href: W4_C4_emg.html
+        - text: W4 C5
+          href: W4_C5_emg.html
+        - text: W4 C7
+          href: W4_C7_emg.html
+        - text: W4 C8
+          href: W4_C8_emg.html
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: true

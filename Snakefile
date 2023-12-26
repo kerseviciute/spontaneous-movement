@@ -1,18 +1,58 @@
+import pandas as pd
 
 configfile: 'config.yml'
 
+samples = pd.read_csv(config['sample_sheet'])
+# TODO: for now, generate results for one data type only
+samples = samples[samples['Type'] == 'S1_L2/3']
+
 rule all:
   input:
-    expand('output/{project}/W1/C3/emg/filter.pkl', project = config['project']),
-    expand('output/{project}/W1/C3/vm/filter.pkl', project = config['project']),
-    expand('output/{project}/W1/C3/emg/filtered_movement_events.pkl', project = config['project']),
-    expand('output/{project}/W1/C3/emg/no_movement_events.pkl', project = config['project'])
+    expand('output/{project}/report/{page}.html',
+      project = config['project'],
+      page = config['report']['pages']
+    )
+
+rule report_index:
+  input:
+    emg_report = 'output/{project}/report/index_emg.html'
+  output:
+    report = 'output/{project}/report/index.html'
+  params:
+    script = 'index.Rmd'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+rule report_emg_index:
+  input:
+    reports = expand('output/{{project}}/report/{sid}_emg.html', sid = samples['SID'])
+  output:
+    report = 'output/{project}/report/index_emg.html'
+  params:
+    script = 'reports/emg/emg_index.Rmd'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+rule report_emg:
+  input:
+    raw = 'output/{project}/{sid}/{cell}/emg/raw.pkl',
+    data = 'output/{project}/{sid}/{cell}/emg/filter.pkl',
+    no_movement_filtered = 'output/{project}/{sid}/{cell}/emg/no_movement_events.pkl',
+    movement = 'output/{project}/{sid}/{cell}/emg/movement_events.pkl',
+    movement_filtered = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
+  output:
+    report = 'output/{project}/report/{sid}_{cell}_emg.html'
+  params:
+    script = 'reports/emg/emg.Rmd'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
 
 rule sample_sheet:
   input:
     data = 'raw/cells patched_naive.xlsx'
   output:
-    sample_sheet = 'sample_sheet.csv'
+    sample_sheet = config['sample_sheet'],
+    samples = expand('output/{project}/samples.RDS', project = config['project'])
   conda: 'env/r.yml'
   script: 'R/sample_sheet.R'
 
@@ -101,20 +141,6 @@ rule extract_events_no_move:
     detectMovement = False
   conda: 'env/mne.yml'
   script: 'python/extract_events.py'
-
-rule report_emg:
-  input:
-    raw = 'output/{project}/{sid}/{cell}/emg/raw.pkl',
-    data = 'output/{project}/{sid}/{cell}/emg/filter.pkl',
-    no_movement_filtered = 'output/{project}/{sid}/{cell}/emg/no_movement_events.pkl',
-    movement = 'output/{project}/{sid}/{cell}/emg/movement_events.pkl',
-    movement_filtered = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
-  output:
-    report = 'output/{project}/report/{sid}_{cell}_emg.html'
-  params:
-    script = 'emg.Rmd'
-  conda: 'env/r.yml'
-  script: 'R/render.R'
 
 #
 # Convert the raw VM .txt files to MNE objects for further processing.
