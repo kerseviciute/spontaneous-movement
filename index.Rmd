@@ -12,3 +12,5 @@ title: Spontaneous Movement
 
 - **EMG data preprocessing**. Information on EMG data preprocessing as well as the results for all individual
   files can be reached [here](index_emg.html).
+- **Vm data preprocessing**. Information on Vm data preprocessing as well as the results for all individual
+files can be reached [here](index_vm.html).

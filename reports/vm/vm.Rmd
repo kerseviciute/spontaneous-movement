@@ -1,0 +1,61 @@
+---
+date: <small>`r Sys.Date()`</small>
+author: <small>Ieva Kerseviciute</small>
+---
+
+```{r, include = FALSE}
+# snakemake <- readRDS('.emg.Rmd.RDS')
+library(reticulate)
+library(knitr)
+
+reticulate::use_condaenv('mne') # TODO: add PyQt5 to the environment
+knitr::knit_engines$set(python = reticulate::eng_python)
+
+setOption <- options
+setOption(knitr.graphics.rel_path = FALSE)
+
+scriptdir <- snakemake@scriptdir
+data_filename <- snakemake@input$data
+movement_filename <- snakemake@input$movement_filtered
+no_movement_filename <- snakemake@input$no_movement_filtered
+
+config <- snakemake@config
+```
+
+---
+title: '`r paste('Vm Data Processing:', snakemake@wildcards$sid, snakemake@wildcards$cell)`'
+---
+
+```{python, echo = FALSE}
+import PyQt5
+import pickle
+import mne
+import numpy as np
+import pandas as pd
+
+with open(f'{r.scriptdir}/python/methods_for_r.py', 'r') as file:
+    exec(file.read())
+
+data = read_pickle(r.data_filename)
+movement_events = read_pickle(r.movement_filename)
+no_movement_events = read_pickle(r.no_movement_filename)
+```
+
+## Preprocessing
+
+The Vm data were not filtered nor centered.
+
+```{python, include = TRUE, echo = FALSE}
+plot_all_events(data, channels = range(0, len(data.ch_names)), limit = None)
+```
+
+**Figure 1.** Vm data after filtering.
+
+## Movement Event Detection
+
+```{python, include = TRUE, echo = FALSE}
+plot_all_events(data, channels = range(0, len(data.ch_names)), movement = movement_events, no_movement = no_movement_events, limit = None, channel_col = 'ChannelId')
+```
+
+**Figure 4.** Good quality events after filtering, marked in the Vm data. Good quality movement events are marked
+in **red**, good quality no movement events are marked in **blue**.

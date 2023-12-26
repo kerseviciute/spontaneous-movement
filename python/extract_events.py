@@ -36,7 +36,7 @@ print(f'Events expanded by: {expand_by} seconds')
 
 events = []
 
-for channel in tke.ch_names:
+for i, channel in enumerate(tke.ch_names):
     channel_data = tke.get_data(picks = [channel])[0]
     channel_events = extract_events(
         tkeo = channel_data,
@@ -49,6 +49,7 @@ for channel in tke.ch_names:
     )
 
     channel_events['Channel'] = channel
+    channel_events['ChannelId'] = i
     events.append(channel_events)
 
 events = pd.concat(events, ignore_index = True)

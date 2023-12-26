@@ -40,10 +40,38 @@ rule report_emg:
     report = 'output/{project}/report/{sid}_{cell}_emg.html'
   params:
     script = 'reports/emg/emg.Rmd'
-  threads: 8 # best not to run in parallel (figures get mixed up)
+  priority: 10
+  threads: 4 # best not to run in parallel (figures get mixed up)
   conda: 'env/r.yml'
   script: 'R/render.R'
 
+rule report_vm_index:
+  input:
+    reports = expand('output/{{project}}/report/{sid}_vm.html', sid = samples['SID'])
+  output:
+    report = 'output/{project}/report/index_vm.html'
+  params:
+    script = 'reports/vm/vm_index.Rmd'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+rule report_vm:
+  input:
+    data = 'output/{project}/{sid}/{cell}/vm/filter.pkl',
+    no_movement_filtered = 'output/{project}/{sid}/{cell}/emg/no_movement_events.pkl',
+    movement_filtered = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
+  output:
+    report = 'output/{project}/report/{sid}_{cell}_vm.html'
+  params:
+    script = 'reports/vm/vm.Rmd'
+  priority: 10
+  threads: 4 # best not to run in parallel (figures get mixed up)
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+#
+# Generate a sample sheet from the excel data.
+#
 rule sample_sheet:
   input:
     data = 'raw/cells patched_naive.xlsx'

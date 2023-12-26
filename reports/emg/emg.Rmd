@@ -53,13 +53,13 @@ After filtering, the data were scaled using z-transform with the mean and standa
 complete sample data.
 
 ```{python, include = TRUE, echo = FALSE}
-plot_all_events(raw)
+plot_all_events(raw, channels = raw.ch_names)
 ```
 
 **Figure 1.** EMG data before filtering.
 
 ```{python, include = TRUE, echo = FALSE}
-plot_all_events(data, limit = 10)
+plot_all_events(data, channels = data.ch_names, limit = 10)
 ```
 
 **Figure 2.** EMG data after filtering.
@@ -67,13 +67,13 @@ plot_all_events(data, limit = 10)
 ## Movement Event Detection
 
 ```{python, include = TRUE, echo = FALSE}
-plot_all_events(data, movement_unfiltered, limit = 10)
+plot_all_events(data, channels = data.ch_names, movement = movement_unfiltered, limit = 10)
 ```
 
 **Figure 3.** All detected movement events.
 
 ```{python, include = TRUE, echo = FALSE}
-plot_all_events(data, movement_events, no_movement_events, limit = 10)
+plot_all_events(data, channels = data.ch_names, movement = movement_events, no_movement = no_movement_events, limit = 10)
 ```
 
 **Figure 4.** Good quality events after filtering. Good quality movement events are marked in **red**, good quality

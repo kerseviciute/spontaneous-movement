@@ -59,6 +59,7 @@ for i, event in movement.iterrows():
     )
 
     exact_event['Channel'] = event['Channel']
+    exact_event['ChannelId'] = event['ChannelId']
     exact_time_events.append(exact_event)
 
 exact_time_events = pd.concat(exact_time_events, ignore_index = True)

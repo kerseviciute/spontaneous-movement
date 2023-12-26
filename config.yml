@@ -63,3 +63,4 @@ report:
   pages:
     - index
     - index_emg
+    - index_vm

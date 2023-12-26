@@ -1,0 +1,15 @@
+---
+date: <small>`r Sys.Date()`</small>
+author: <small>Ieva Kerseviciute</small>
+title: Spontaneous Movement
+---
+
+```{r, include = FALSE}
+# snakemake <- readRDS('.emg_index.Rmd.RDS')
+
+config <- snakemake@config
+```
+
+# Vm data preprocessing
+
+The Vm data were not filtered nor centered.
