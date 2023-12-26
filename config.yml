@@ -51,6 +51,7 @@ movement:
   minMovementTime: 0.5 # seconds
   # Drop final events that have average amplitude lower than this threshold
   minMovementAmplitude: 1 # TODO!!!!!!
+  # TODO: filter by maximum time?
 
 no_movement:
   tkeoThreshold: 0.025
