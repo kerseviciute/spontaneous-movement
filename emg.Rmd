@@ -16,7 +16,8 @@ data_filename <- snakemake@input$data
 movement_raw_filename <- snakemake@input$movement
 movement_filename <- snakemake@input$movement_filtered
 no_movement_filename <- snakemake@input$no_movement_filtered
-# title:
+
+config <- snakemake@config
 ```
 
 ---
@@ -41,6 +42,9 @@ no_movement_events = read_pickle(r.no_movement_filename)
 ```
 
 ## Preprocessing
+
+The EMG data were filtered to remove frequencies lower than `r config$filter$emg$drop_below` Hz
+and higher than `r config$filter$emg$drop_above` Hz. The symmetric linear-phase FIR filter was used.
 
 ```{python, include = TRUE, echo = FALSE}
 plot_all_events(raw)
