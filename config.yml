@@ -62,5 +62,9 @@ no_movement:
 report:
   pages:
     - index
-    - index_emg
-    - index_vm
+#    - index_emg
+#    - index_vm
+    - S1_L23_events
+    - S1_L5_events
+    - M1_L23_events
+    - M1_L5_events

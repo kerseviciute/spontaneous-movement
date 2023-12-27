@@ -1,0 +1,150 @@
+---
+date: <small>`r Sys.Date()`</small>
+author: <small>Ieva Kerseviciute</small>
+---
+
+```{r, include = FALSE}
+# snakemake <- readRDS('.emg.Rmd.RDS')
+library(reticulate)
+library(knitr)
+reticulate::use_condaenv('mne')
+knitr::knit_engines$set(python = reticulate::eng_python)
+setOption <- options
+setOption(knitr.graphics.rel_path = FALSE)
+```
+
+```{r, include = FALSE}
+scriptdir <- snakemake@scriptdir
+
+samples_filename <- snakemake@input$samples
+region_wildcard <- snakemake@wildcards$region
+
+config <- snakemake@config
+```
+
+---
+title: '`r gsub(x = region_wildcard, pattern = '_', replacement = ' ')`'
+---
+
+```{python, echo = FALSE, include = FALSE}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import ttest_ind
+
+with open(f'{r.scriptdir}/python/methods_for_r.py', 'r') as file:
+    exec(file.read())
+
+samples = pd.read_csv(r.samples_filename)
+samples = samples[ samples['Region'] == r.region_wildcard ]
+
+event_data_before = read_event_data(sample_ids = samples['SID'], time_shift = -0.25, event_length = 0.5)
+```
+
+```{python, include = TRUE, echo = FALSE}
+for i in event_data_before:
+    plt.plot(i, linewidth = 0.05, color = 'black')
+
+plt.axvline(x = 0.25 * 20000, label = 'Movement onset')
+plt.plot(np.mean(event_data_before, axis = 0), linewidth = 0.75, color = 'red', label = 'Average')
+plt.legend(loc = 'upper right')
+plt.show()
+```
+
+```{python, include = TRUE, echo = FALSE}
+onset_idx = int(0.25 * 20000)
+print(f'Average signal before the event: {np.mean(event_data_before[ :, :onset_idx ])}')
+print(f'Average signal during the event: {np.mean(event_data_before[ :, onset_idx: ])}')
+```
+
+```{python, include = FALSE, echo = FALSE}
+event_data_after = read_event_data(sample_ids = samples['SID'], time_shift = 0.25, event_length = 0.5)
+```
+
+```{python, include = TRUE, echo = FALSE}
+for i in event_data_after:
+    plt.plot(i, linewidth = 0.05, color = 'black')
+
+plt.axvline(x = 0.5 * 20000, label = 'Movement offset')
+plt.plot(np.mean(event_data_after, axis = 0), linewidth = 0.75, color = 'red', label = 'Average')
+plt.legend(loc = 'upper right')
+plt.show()
+```
+
+```{python, include = TRUE, echo = FALSE}
+offset_idx = int(0.5 * 20000)
+print(f'Average signal during the event: {np.mean(event_data_after[ :, :offset_idx ])}')
+print(f'Average signal after the event: {np.mean(event_data_after[ :, offset_idx: ])}')
+```
+
+```{python, include = TRUE, echo = FALSE}
+data_before = event_data_before[ :, :onset_idx ]
+data_during_early = event_data_before[ :, onset_idx: ]
+data_during_late = event_data_after[ :, :offset_idx ]
+data_after = event_data_after[ :, offset_idx: ]
+
+dt = np.concatenate([
+    np.mean(data_before, axis = 1),
+    np.mean(data_during_early, axis = 1),
+    np.mean(data_during_late, axis = 1),
+    np.mean(data_after, axis = 1)
+])
+
+types = np.concatenate([
+    np.repeat('Before', data_before.shape[0]),
+    np.repeat('Early event', data_during_early.shape[0]),
+    np.repeat('Late event', data_during_late.shape[0]),
+    np.repeat('After', data_after.shape[0])
+])
+
+assert len(dt) == len(types)
+
+dt = pd.DataFrame({
+    'Median': dt,
+    'Type': types
+})
+```
+
+```{python, include = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+plt.violinplot([
+    dt[dt['Type'] == 'Before']['Median'],
+    dt[dt['Type'] == 'Early event']['Median'],
+    dt[dt['Type'] == 'Late event']['Median'],
+    dt[dt['Type'] == 'After']['Median']
+], showmeans = True);
+
+plt.xticks([1, 2, 3, 4], ['Before', 'Early', 'Late', 'After']);
+plt.title('Median Vm Signal');
+plt.show();
+```
+
+Significance between before the event and during early event:
+
+```{python, include = TRUE, echo = FALSE}
+dt1 = dt[dt['Type'] == 'Before']['Median']
+dt2 = dt[dt['Type'] == 'Early event']['Median']
+t_statistic, p_value = ttest_ind(dt1, dt2)
+print('T-statistic:', t_statistic)
+print('P-value:', p_value)
+```
+
+Significance between during early event and during late event:
+
+```{python, include = TRUE, echo = FALSE}
+dt1 = dt[dt['Type'] == 'Early event']['Median']
+dt2 = dt[dt['Type'] == 'Late event']['Median']
+t_statistic, p_value = ttest_ind(dt1, dt2)
+print('T-statistic:', t_statistic)
+print('P-value:', p_value)
+```
+
+Significance between during late event and after event:
+
+```{python, include = TRUE, echo = FALSE}
+dt1 = dt[dt['Type'] == 'Late event']['Median']
+dt2 = dt[dt['Type'] == 'After']['Median']
+t_statistic, p_value = ttest_ind(dt1, dt2)
+print('T-statistic:', t_statistic)
+print('P-value:', p_value)
+```
+

@@ -15,7 +15,7 @@ rule report_index:
   output:
     report = 'output/{project}/report/index.html'
   params:
-    script = 'index.Rmd'
+    script = 'reports/index.Rmd'
   conda: 'env/r.yml'
   script: 'R/render.R'
 
@@ -66,6 +66,19 @@ rule report_vm:
     script = 'reports/vm/vm.Rmd'
   priority: 10
   threads: 4 # best not to run in parallel (figures get mixed up)
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+rule report_vm_in_events:
+  input:
+    samples = config['sample_sheet'],
+    movement = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location']),
+    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
+  output:
+    report = 'output/{project}/report/{region}_events.html'
+  params:
+    script = 'reports/vm_in_events.Rmd'
+  threads: 4
   conda: 'env/r.yml'
   script: 'R/render.R'
 

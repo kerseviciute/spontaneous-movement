@@ -16,7 +16,8 @@ data <- rbind(
   .[ , AnimalID := gsub(x = SID, pattern = '(W[0-9]+)_.+', replacement = '\\1') ] %>%
   .[ , CellName := gsub(x = SID, pattern = 'W[0-9]+_(C[0-9]+)', replacement = '\\1') ] %>%
   data.table::setcolorder(c('SID', 'AnimalID', 'CellName')) %>%
-  .[ , Region := gsub(x = Region, pattern = '/', replacement = '') ]
+  .[ , Region := gsub(x = Region, pattern = '/', replacement = '') ] %>%
+  .[ , Location := paste(AnimalID, CellName, sep = '/') ]
 
 head(data)
 
