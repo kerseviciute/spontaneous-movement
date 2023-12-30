@@ -6,66 +6,47 @@ samples = pd.read_csv(config['sample_sheet'])
 
 rule all:
   input:
-    expand('output/{project}/report/{page}.html',
+    expand('{project}/{page}.html',
       project = config['project'],
       page = config['report']['pages']
     )
 
 rule report_index:
   output:
-    report = 'output/{project}/report/index.html'
+    report = '{project}/index.html'
   params:
     script = 'reports/index.Rmd'
   conda: 'env/r.yml'
   script: 'R/render.R'
 
-rule report_emg_index:
-  input:
-    reports = expand('output/{{project}}/report/{sid}_emg.html', sid = samples['SID'])
-  output:
-    report = 'output/{project}/report/index_emg.html'
-  params:
-    script = 'reports/emg/emg_index.Rmd'
-  conda: 'env/r.yml'
-  script: 'R/render.R'
-
+# May take a while to run!
 rule report_emg:
   input:
-    raw = 'output/{project}/{sid}/{cell}/emg/raw.pkl',
-    data = 'output/{project}/{sid}/{cell}/emg/filter.pkl',
-    no_movement_filtered = 'output/{project}/{sid}/{cell}/emg/no_movement_events.pkl',
-    movement = 'output/{project}/{sid}/{cell}/emg/movement_events.pkl',
-    movement_filtered = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
+    samples = config['sample_sheet'],
+    raw = expand('output/{{project}}/{sid}/emg/raw.pkl', sid = samples['Location']),
+    data = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
+    no_movement_filtered = expand('output/{{project}}/{sid}/emg/no_movement_events.pkl', sid = samples['Location']),
+    movement = expand('output/{{project}}/{sid}/emg/movement_events.pkl', sid = samples['Location']),
+    movement_filtered = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location'])
   output:
-    report = 'output/{project}/report/{sid}_{cell}_emg.html'
+    report = '{project}/emg.html'
   params:
-    script = 'reports/emg/emg.Rmd'
-  priority: 10
-  threads: 4 # best not to run in parallel (figures get mixed up)
+    script = 'reports/emg.Rmd',
+    prefix = 'output/{project}'
   conda: 'env/r.yml'
   script: 'R/render.R'
 
-rule report_vm_index:
-  input:
-    reports = expand('output/{{project}}/report/{sid}_vm.html', sid = samples['SID'])
-  output:
-    report = 'output/{project}/report/index_vm.html'
-  params:
-    script = 'reports/vm/vm_index.Rmd'
-  conda: 'env/r.yml'
-  script: 'R/render.R'
-
+# May take a while to run!
 rule report_vm:
   input:
-    data = 'output/{project}/{sid}/{cell}/vm/filter.pkl',
-    no_movement_filtered = 'output/{project}/{sid}/{cell}/emg/no_movement_events.pkl',
-    movement_filtered = 'output/{project}/{sid}/{cell}/emg/filtered_movement_events.pkl'
+    samples = config['sample_sheet'],
+    data = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location']),
+    movement_filtered = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location'])
   output:
-    report = 'output/{project}/report/{sid}_{cell}_vm.html'
+    report = '{project}/vm.html'
   params:
-    script = 'reports/vm/vm.Rmd'
-  priority: 10
-  threads: 4 # best not to run in parallel (figures get mixed up)
+    script = 'reports/vm.Rmd',
+    prefix = 'output/{project}'
   conda: 'env/r.yml'
   script: 'R/render.R'
 

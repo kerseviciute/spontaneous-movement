@@ -1,0 +1,90 @@
+---
+date: <small>`r Sys.Date()`</small>
+author: <small>Ieva Kerseviciute</small>
+title: Spontaneous Movement
+---
+
+```{r r_setup, include = FALSE}
+# snakemake <- readRDS('.vm.Rmd.RDS')
+snakemake@source('R/rmd_setup.R')
+library(foreach)
+library(data.table)
+library(dplyr)
+
+config <- snakemake@config
+
+scriptdir <- snakemake@scriptdir
+prefix <- snakemake@params$prefix
+
+samples <- fread(snakemake@input$samples)
+```
+
+```{python python_setup}
+import mne
+import numpy as np
+import pandas as pd
+
+with open(f'{r.scriptdir}/python/methods_for_r.py', 'r') as file:
+    exec(file.read())
+```
+
+# Vm data preprocessing {.tabset}
+
+## S1 L2/3 {.tabset .tabset-pills .unlisted .unnumbered}
+
+```{r}
+region_samples <- samples[ Region == 'S1_L23']
+```
+```{r s1_l23_emg}
+pages <- foreach::foreach(animalId = region_samples[ , AnimalID ], cellName = region_samples[ , CellName ]) %do% {
+  knitr::knit_child(glue::glue('{snakemake@scriptdir}/reports/components/vm.Rmd'), quiet = TRUE, envir = environment())
+}
+```
+```{r, include = TRUE, results = 'asis'}
+cat(unlist(pages), sep = '\n')
+```
+
+
+## S1 L5 {.tabset .tabset-pills .unlisted .unnumbered}
+
+```{r}
+region_samples <- samples[ Region == 'S1_L5']
+```
+```{r s1_l5_emg}
+pages <- foreach::foreach(animalId = region_samples[ , AnimalID ], cellName = region_samples[ , CellName ]) %do% {
+  knitr::knit_child(glue::glue('{snakemake@scriptdir}/reports/components/vm.Rmd'), quiet = TRUE, envir = environment())
+}
+```
+```{r, include = TRUE, results = 'asis'}
+cat(unlist(pages), sep = '\n')
+```
+
+
+## M1 L2/3 {.tabset .tabset-pills .unlisted .unnumbered}
+
+```{r}
+region_samples <- samples[ Region == 'M1_L23']
+```
+```{r m1_l23_emg}
+pages <- foreach::foreach(animalId = region_samples[ , AnimalID ], cellName = region_samples[ , CellName ]) %do% {
+  knitr::knit_child(glue::glue('{snakemake@scriptdir}/reports/components/vm.Rmd'), quiet = TRUE, envir = environment())
+}
+```
+```{r, include = TRUE, results = 'asis'}
+cat(unlist(pages), sep = '\n')
+```
+
+
+## M1 L5 {.tabset .tabset-pills .unlisted .unnumbered}
+
+```{r}
+region_samples <- samples[ Region == 'M1_L5']
+```
+```{r m1_l5_emg}
+pages <- foreach::foreach(animalId = region_samples[ , AnimalID ], cellName = region_samples[ , CellName ]) %do% {
+  knitr::knit_child(glue::glue('{snakemake@scriptdir}/reports/components/vm.Rmd'), quiet = TRUE, envir = environment())
+}
+```
+```{r, include = TRUE, results = 'asis'}
+cat(unlist(pages), sep = '\n')
+```

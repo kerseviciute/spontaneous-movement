@@ -9,4 +9,10 @@ dependencies:
   - r-dplyr 1.1.4
   - r-data.table 1.14.10
   - r-foreach 1.5.2
-  - r-openxlsx 4.2.5.2
+  - r-ggplot2 3.4.4
+  - r-plotly 4.10.3
+  - r-ggpubr 0.6.0
+  - r-knitr 1.45
+  - r-dt 0.31
+  - r-glue 1.6.2
+  - r-ggrepel 0.9.4

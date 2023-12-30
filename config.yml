@@ -30,7 +30,7 @@ movement:
   #
 
   # Required period with no signal before and after the event
-  calmTime: 0.1 # seconds
+  calmTime: 0.5 # seconds
   # Maximum allowed amplitude deviation from resting state amplitude is
   # {calmAmplitudeDifference} times higher than the average no movement amplitude.
   calmAmplitudeDifference: 2 # times
@@ -62,9 +62,10 @@ no_movement:
 report:
   pages:
     - index
-#    - index_emg
+    - emg
+    - vm
 #    - index_vm
-    - S1_L23_events
-    - S1_L5_events
-    - M1_L23_events
-    - M1_L5_events
+#    - S1_L23_events
+#    - S1_L5_events
+#    - M1_L23_events
+#    - M1_L5_events

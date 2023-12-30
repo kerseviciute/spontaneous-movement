@@ -1,0 +1,45 @@
+### `r animalId` `r cellName`
+
+```{python}
+prefix = f'{r.prefix}/{r.animalId}/{r.cellName}'
+
+raw = pd.read_pickle(f'{prefix}/emg/raw.pkl')
+data = pd.read_pickle(f'{prefix}/emg/filter.pkl')
+movement_unfiltered = pd.read_pickle(f'{prefix}/emg/movement_events.pkl')
+movement_events = pd.read_pickle(f'{prefix}/emg/filtered_movement_events.pkl')
+no_movement_events = pd.read_pickle(f'{prefix}/emg/no_movement_events.pkl')
+```
+
+```{python, include = TRUE}
+plot_all_events(data, channels = data.ch_names, movement = movement_events, no_movement = no_movement_events, limit = 10)
+```
+
+**Figure 1.** Good quality events after filtering. Good quality movement events are marked in **red**, good quality
+no movement events are marked in **blue**.
+
+#### Preprocessing
+
+The EMG data were filtered to remove frequencies lower than `r config$filter$emg$drop_below` Hz
+and higher than `r config$filter$emg$drop_above` Hz. The symmetric linear-phase FIR filter was used.
+After filtering, the data were scaled using z-transform with the mean and standard deviations of the
+complete sample data.
+
+```{python, include = TRUE}
+plot_all_events(raw, channels = raw.ch_names)
+```
+
+**Figure 2.** EMG data before filtering.
+
+```{python, include = TRUE}
+plot_all_events(data, channels = data.ch_names, limit = 10)
+```
+
+**Figure 3.** EMG data after filtering.
+
+#### Movement Event Detection
+
+```{python, include = TRUE}
+plot_all_events(data, channels = data.ch_names, movement = movement_unfiltered, limit = 10)
+```
+
+**Figure 4.** All detected movement events.

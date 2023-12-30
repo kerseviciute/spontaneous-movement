@@ -5,6 +5,10 @@ navbar:
     - text: Home
       icon: fa-home
       href: index.html
+    - text: EMG preprocessing
+      href: emg.html
+    - text: Vm preprocessing
+      href: vm.html
     - text: Vm During Events
       menu:
         - text: S1 L2/3

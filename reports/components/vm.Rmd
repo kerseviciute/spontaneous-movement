@@ -1,0 +1,17 @@
+### `r animalId` `r cellName`
+
+```{python}
+prefix = f'{r.prefix}/{r.animalId}/{r.cellName}'
+
+data = pd.read_pickle(f'{prefix}/vm/filter.pkl')
+movement_events = pd.read_pickle(f'{prefix}/emg/filtered_movement_events.pkl')
+```
+
+The Vm data were not filtered nor centered.
+
+```{python, include = TRUE, echo = FALSE}
+plot_all_events(data, channels = range(0, len(data.ch_names)), movement = movement_events, limit = None, channel_col = 'ChannelId')
+```
+
+**Figure 1.** Good quality events after filtering, marked in the Vm data. Good quality movement events are marked
+in **red**.

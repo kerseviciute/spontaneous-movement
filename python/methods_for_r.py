@@ -111,7 +111,6 @@ def read_sample_event_data(sample_name, movement = True, time_shift = 0, event_l
 
         # If the time shift was not possible, will have to append a few points here and there
         if len(channel_data) < n_expected_points:
-            print('Too short')
             average = np.mean(channel_data)
             append = np.ones(int(n_expected_points - len(channel_data)))
             append = append * average
@@ -119,9 +118,11 @@ def read_sample_event_data(sample_name, movement = True, time_shift = 0, event_l
             assert len(append) + len(channel_data) == n_expected_points
 
             if before_event:
-                channel_data = np.concatenate([append, channel_data])
-            else:
+                print('Event was too short, appending at the end')
                 channel_data = np.concatenate([channel_data, append])
+            else:
+                print('Event was too short, appending at the start')
+                channel_data = np.concatenate([append, channel_data])
 
         event_data.append(channel_data)
 
