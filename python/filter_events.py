@@ -27,14 +27,14 @@ movement = movement[ movement['Amplitude'] >= amplitude_cutoff ]
 print(f'   Number of events after filtering: {len(movement)}')
 
 
-print('2. Drop events that are at the very beginning / very end of the recording')
+# print('2. Drop events that are at the very beginning / very end of the recording')
 
 calm_time = snakemake.params['calm_time']
 
-print(f'   Number of events before filtering: {len(movement)}')
-movement = movement[ movement['Start'] > calm_time ]
-movement = movement[ movement['End'] < np.max(data.times) - calm_time ]
-print(f'   Number of events after filtering: {len(movement)}')
+# print(f'   Number of events before filtering: {len(movement)}')
+# movement = movement[ movement['Start'] > calm_time ]
+# movement = movement[ movement['End'] < np.max(data.times) - calm_time ]
+# print(f'   Number of events after filtering: {len(movement)}')
 
 
 print('3. Determine exact movement onset/offset time')
@@ -142,6 +142,14 @@ final_events = final_events[ final_events['Length'] >= min_movement_time ]
 
 print(f'       Number of events after filtering: {len(final_events)}')
 
+print('2. Drop events that are at the very beginning of the recording')
+
+print(f'   Number of events before filtering: {len(movement)}')
+final_events = final_events[ final_events['Start'] > calm_time ]
+print(f'   Number of events after filtering: {len(movement)}')
+
 print(f'Final number of events after onset/offset time correction and filtering: {len(final_events)}')
+
+final_events = final_events.reset_index(drop = True)
 
 save_pickle(final_events, snakemake.output['movement'])
