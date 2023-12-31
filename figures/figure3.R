@@ -8,7 +8,6 @@ library(cowplot)
 colors <- wes_palette('Zissou1')
 
 example_data <- fread('output/spontaneous-movement/figures/event_data.csv')
-sids <- example_data[ , unique(SID) ][ 1:2 ]
 
 example_data <- example_data %>%
   .[ , Time := Time - unique(EventStart) ] %>%
@@ -124,48 +123,3 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
 final <- ggarrange(plotlist = plot, ncol = 4)
 
 ggsave(final, filename = 'figure3.png', height = 7.4, width = 8, bg = 'white', dpi = 600)
-
-# This is a good graph, but maybe put it somewhere else. Also, would be useful to compare
-# amplitudes during rest periods, and create this graph with them subtracted from mean
-# (imo, the result is biased otherwise).
-
-# type_average <- example_data %>%
-#     .[ , list(VM = mean(VM)), by = list(SID, Type, EventId, Region) ] %>%
-#     .[ Type != 'None' ] %>%
-#     .[ , Type := factor(Type, levels = c('Baseline', 'Pre-movement', 'Movement onset', 'Late movement')) ] %>%
-#       .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
-#   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
-#   .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ]
-
-# p3 <- type_average %>%
-# ggplot(aes(x = Region, y = VM, color = Type)) +
-# facet_wrap(~Type, ncol = 4) +
-# geom_boxplot(outlier.alpha = 0) +
-# geom_jitter(height = 0, width = 0.2, alpha = 0.2) +
-# stat_compare_means(aes(label = after_stat(p.signif)),
-#   comparisons = list(
-#     c('S1 L2/3', 'S1 L5'),
-#     c('S1 L5', 'M1 L2/3'),
-#     c('S1 L2/3', 'M1 L2/3'),
-#     c('S1 L5', 'M1 L5'),
-#     c('S1 L2/3', 'M1 L5')
-#   ), method = 't.test', size = 2.5) +
-# stat_compare_means(aes(label = after_stat(p.signif)),
-#   comparisons = list(
-#     c('M1 L2/3', 'M1 L5')
-#   ), method = 't.test', size = 2.5) +
-# theme_light(base_size = 8) +
-#     scale_colour_manual(values = c('Baseline' = colors[1], 'Pre-movement' = colors[2], 'Movement onset' = colors[3], 'Late movement' = colors[4])) +
-#     xlab('') +
-#     theme(legend.position = 'none') +
-#     theme(strip.background = element_rect(fill = 'white')) +
-#   theme(strip.text = element_text(colour = 'black')) +
-#   ylab('Average membrane potential, V (mV)')
-
-# final <- ggarrange(
-#   ggarrange(plotlist = plot, ncol = 4, labels = letters[1:4], font.label = list(size = 12)),
-#   ggarrange(p3, ncol = 1, nrow = 1, labels = letters[5], font.label = list(size = 12)),
-#   nrow = 2,
-#   heights = c(3/5, 2/5)
-# )
-
