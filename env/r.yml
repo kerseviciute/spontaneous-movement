@@ -16,3 +16,6 @@ dependencies:
   - r-dt 0.31
   - r-glue 1.6.2
   - r-ggrepel 0.9.4
+  - r-wesanderson 0.3.7
+  - r-cowplot 1.1.2
+  - r-gridgraphics 0.5_1

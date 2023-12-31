@@ -26,6 +26,12 @@ config <- snakemake@config
 title: '`r gsub(x = region_wildcard, pattern = '_', replacement = ' ')`'
 ---
 
+# Vm Signal Changes During Events
+
+## Signal differences
+
+### Before the event
+
 ```{python, echo = FALSE, include = FALSE}
 import numpy as np
 import pandas as pd
@@ -56,6 +62,8 @@ onset_idx = int(0.25 * 20000)
 print(f'Average signal before the event: {np.mean(event_data_before[ :, :onset_idx ])}')
 print(f'Average signal during the event: {np.mean(event_data_before[ :, onset_idx: ])}')
 ```
+
+### After the event
 
 ```{python, include = FALSE, echo = FALSE}
 event_data_after = read_event_data(sample_ids = samples['SID'], time_shift = 0.25, event_length = 0.5)

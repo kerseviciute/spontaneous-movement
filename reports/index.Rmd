@@ -6,6 +6,20 @@ title: Spontaneous Movement
 
 ```{r, include = FALSE}
 # snakemake <- readRDS('.index.Rmd.RDS')
+library(reticulate)
+library(knitr)
+reticulate::use_condaenv('mne')
+knitr::knit_engines$set(python = reticulate::eng_python)
+setOption <- options
+setOption(knitr.graphics.rel_path = FALSE)
+```
+
+```{r, include = FALSE}
+scriptdir <- snakemake@scriptdir
+
+samples_filename <- snakemake@input$samples
+
+config <- snakemake@config
 ```
 
 # Project summary
@@ -14,3 +28,116 @@ title: Spontaneous Movement
   files can be reached [here](index_emg.html).
 - **Vm data preprocessing**. Information on Vm data preprocessing as well as the results for all individual
 files can be reached [here](index_vm.html).
+
+## When does the signal start to increase / decrease?
+
+```{python, echo = FALSE, include = FALSE}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+with open(f'{r.scriptdir}/python/methods_for_r.py', 'r') as file:
+  exec(file.read())
+
+time_shift = -0.5
+event_length = 0.25
+time = np.array(range(0, int(0.75 * 20_000) + 1, 1)) / 20_000
+sfreq = 20_000
+```
+
+### S1 L2/3
+
+```{python include = FALSE, echo = FALSE}
+samples = pd.read_csv(r.samples_filename)
+samples = samples[ samples['Region'] == 'S1_L23' ]
+```
+
+```{python, echo = FALSE, include = FALSE}
+before_data = read_event_data(sample_ids = samples['SID'], time_shift = time_shift, event_length = event_length)
+
+```
+
+```{python, echo = FALSE, include = TRUE}
+average = np.mean(before_data, axis = 0)
+window_size = 500
+smooth = np.convolve(average, np.ones(window_size) / window_size, mode = 'same')[ window_size:-window_size ]
+
+plt.plot(time[window_size:-window_size], average[ window_size:-window_size ], linewidth = 0.75, color = 'red', label = 'Average signal')
+plt.plot(time[window_size:-window_size], smooth, linewidth = 0.75, color = 'black', label = 'Smooth signal')
+plt.axvline(x = 0.5, label = 'Movement onset')
+plt.legend(loc = 'lower right')
+plt.show()
+```
+
+### S1 L5
+
+```{python include = FALSE, echo = FALSE}
+samples = pd.read_csv(r.samples_filename)
+samples = samples[ samples['Region'] == 'S1_L5' ]
+```
+
+```{python, echo = FALSE, include = FALSE}
+before_data = read_event_data(sample_ids = samples['SID'], time_shift = time_shift, event_length = event_length)
+time = np.array(range(0, int(0.75 * 20_000) + 1, 1)) / 20_000
+```
+
+```{python, echo = FALSE, include = TRUE}
+average = np.mean(before_data, axis = 0)
+window_size = 500
+smooth = np.convolve(average, np.ones(window_size) / window_size, mode = 'same')[ window_size:-window_size ]
+
+plt.plot(time[window_size:-window_size], average[ window_size:-window_size ], linewidth = 0.75, color = 'red', label = 'Average signal')
+plt.plot(time[window_size:-window_size], smooth, linewidth = 0.75, color = 'black', label = 'Smooth signal')
+plt.axvline(x = 0.5, label = 'Movement onset')
+plt.legend(loc = 'lower right')
+plt.show()
+```
+
+### M1 L2/3
+
+```{python include = FALSE, echo = FALSE}
+samples = pd.read_csv(r.samples_filename)
+samples = samples[ samples['Region'] == 'M1_L23' ]
+```
+
+```{python, echo = FALSE, include = FALSE}
+before_data = read_event_data(sample_ids = samples['SID'], time_shift = time_shift, event_length = event_length)
+time = np.array(range(0, int(0.75 * 20_000) + 1, 1)) / 20_000
+```
+
+```{python, echo = FALSE, include = TRUE}
+average = np.mean(before_data, axis = 0)
+window_size = 500
+smooth = np.convolve(average, np.ones(window_size) / window_size, mode = 'same')[ window_size:-window_size ]
+
+plt.plot(time[window_size:-window_size], average[ window_size:-window_size ], linewidth = 0.75, color = 'red', label = 'Average signal')
+plt.plot(time[window_size:-window_size], smooth, linewidth = 0.75, color = 'black', label = 'Smooth signal')
+plt.axvline(x = 0.5, label = 'Movement onset')
+plt.legend(loc = 'lower right')
+plt.show()
+```
+
+### M1 L5
+
+```{python include = FALSE, echo = FALSE}
+samples = pd.read_csv(r.samples_filename)
+samples = samples[ samples['Region'] == 'M1_L5' ]
+```
+
+```{python, echo = FALSE, include = FALSE}
+before_data = read_event_data(sample_ids = samples['SID'], time_shift = time_shift, event_length = event_length)
+time = np.array(range(0, int(0.75 * 20_000) + 1, 1)) / 20_000
+```
+
+```{python, echo = FALSE, include = TRUE}
+average = np.mean(before_data, axis = 0)
+window_size = 500
+smooth = np.convolve(average, np.ones(window_size) / window_size, mode = 'same')[ window_size:-window_size ]
+
+plt.plot(time[window_size:-window_size], average[ window_size:-window_size ], linewidth = 0.75, color = 'red', label = 'Average signal')
+plt.plot(time[window_size:-window_size], smooth, linewidth = 0.75, color = 'black', label = 'Smooth signal')
+plt.axvline(x = 0.5, label = 'Movement onset')
+plt.legend(loc = 'lower right')
+plt.show()
+```
+

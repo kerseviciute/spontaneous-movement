@@ -11,58 +11,6 @@ rule all:
       page = config['report']['pages']
     )
 
-rule report_index:
-  output:
-    report = '{project}/index.html'
-  params:
-    script = 'reports/index.Rmd'
-  conda: 'env/r.yml'
-  script: 'R/render.R'
-
-# May take a while to run!
-rule report_emg:
-  input:
-    samples = config['sample_sheet'],
-    raw = expand('output/{{project}}/{sid}/emg/raw.pkl', sid = samples['Location']),
-    data = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
-    no_movement_filtered = expand('output/{{project}}/{sid}/emg/no_movement_events.pkl', sid = samples['Location']),
-    movement = expand('output/{{project}}/{sid}/emg/movement_events.pkl', sid = samples['Location']),
-    movement_filtered = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location'])
-  output:
-    report = '{project}/emg.html'
-  params:
-    script = 'reports/emg.Rmd',
-    prefix = 'output/{project}'
-  conda: 'env/r.yml'
-  script: 'R/render.R'
-
-# May take a while to run!
-rule report_vm:
-  input:
-    samples = config['sample_sheet'],
-    data = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location']),
-    movement_filtered = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location'])
-  output:
-    report = '{project}/vm.html'
-  params:
-    script = 'reports/vm.Rmd',
-    prefix = 'output/{project}'
-  conda: 'env/r.yml'
-  script: 'R/render.R'
-
-rule report_vm_in_events:
-  input:
-    samples = config['sample_sheet'],
-    movement = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location']),
-    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
-  output:
-    report = 'output/{project}/report/{region}_events.html'
-  params:
-    script = 'reports/vm_in_events.Rmd'
-  threads: 4
-  conda: 'env/r.yml'
-  script: 'R/render.R'
-
 #
 # Generate a sample sheet from the excel data.
 #
@@ -191,3 +139,102 @@ rule vm_filter:
     ch_type = 'bio'
   conda: 'env/mne.yml'
   script: 'python/filter.py'
+
+
+######################################################################
+# Reports
+######################################################################
+
+rule report_index:
+  input:
+    samples = config['sample_sheet'],
+    movement = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location']),
+    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
+  output:
+    report = '{project}/index.html'
+  params:
+    script = 'reports/index.Rmd'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+# May take a while to run!
+rule report_emg:
+  input:
+    samples = config['sample_sheet'],
+    raw = expand('output/{{project}}/{sid}/emg/raw.pkl', sid = samples['Location']),
+    data = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
+    no_movement_filtered = expand('output/{{project}}/{sid}/emg/no_movement_events.pkl', sid = samples['Location']),
+    movement = expand('output/{{project}}/{sid}/emg/movement_events.pkl', sid = samples['Location']),
+    movement_filtered = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location'])
+  output:
+    report = '{project}/emg.html'
+  params:
+    script = 'reports/emg.Rmd',
+    prefix = 'output/{project}'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+# May take a while to run!
+rule report_vm:
+  input:
+    samples = config['sample_sheet'],
+    data = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location']),
+    movement_filtered = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location'])
+  output:
+    report = '{project}/vm.html'
+  params:
+    script = 'reports/vm.Rmd',
+    prefix = 'output/{project}'
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+rule report_vm_in_events:
+  input:
+    samples = config['sample_sheet'],
+    movement = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location']),
+    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
+  output:
+    report = 'output/{project}/report/{region}_events.html'
+  params:
+    script = 'reports/vm_in_events.Rmd'
+  threads: 4
+  conda: 'env/r.yml'
+  script: 'R/render.R'
+
+
+######################################################################
+# Figures
+######################################################################
+
+rule figure_extract_event_data:
+  input:
+    samples = config['sample_sheet'],
+    emg = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
+    movement = expand('output/{{project}}/{sid}/emg/filtered_movement_events.pkl', sid = samples['Location']),
+    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
+  output:
+    data = 'output/{project}/figures/event_data.csv'
+  params:
+    prefix = 'output/{project}',
+  conda: 'env/mne.yml'
+  script: 'figures/extract_all_vm_emg.py'
+
+rule extract_data:
+  input:
+    data = 'output/{project}/{animal_id}/{cell_number}/emg/filter.pkl',
+    vm = 'output/{project}/{animal_id}/{cell_number}/vm/filter.pkl',
+    movement = 'output/{project}/{animal_id}/{cell_number}/emg/filtered_movement_events.pkl',
+    no_movement = 'output/{project}/{animal_id}/{cell_number}/emg/no_movement_events.pkl'
+  output:
+    data = 'output/{project}/figures/{animal_id}_{cell_number}_data.csv'
+  conda: 'env/mne.yml'
+  script: 'figures/extract_data.py'
+
+rule figure_1:
+  input:
+    data = 'output/{project}/figures/W4_C10_data.csv',
+    event_data = 'output/{project}/figures/event_data.csv'
+  output:
+    png = 'output/{project}/figures/figure1.png'
+  conda: 'env/r.yml'
+  script: 'figures/figure1.R'
