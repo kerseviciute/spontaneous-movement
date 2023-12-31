@@ -107,7 +107,7 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
     scale_x_continuous(breaks = c(-0.4, -0.2, 0, 0.2, 0.4))
 
   p5 <- ggdraw() +
-    draw_plot(p1, 0, 0.83, 1, 0.15) +
+    draw_plot(p1, 0, 0.83, 1, 0.16) +
     draw_plot(p2, 0.068, 0.48, 1 - 0.068, 0.35) +
     draw_plot(p3, 0.08, 0.25, 1 - 0.08, 0.25) +
     draw_plot(p4, 0.138, 0, 1 - 0.138, 0.25)
@@ -115,7 +115,7 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
   # Only for the first in list
   if (region == 'S1_L23') {
     p5 <- p5 +
-      draw_plot_label(letters[ 1:4 ], x = c(0, 0, 0, 0), y = c(1, 0.83, 0.48, 0.25), size = 9)
+      draw_plot_label(letters[ 1:4 ], x = c(0, 0, 0, 0), y = c(1, 0.83, 0.5, 0.25), size = 9)
   }
 
   plot[[region]] <- p5
