@@ -7,3 +7,6 @@ output
 .DS_Store
 .*.RDS
 spontaneous-movement
+*.png
+*.pdf
+*.csv
