@@ -24,10 +24,12 @@ p1 <- dt %>%
   geom_jitter(height = 0, width = 0.2, alpha = 0.5) +
   stat_compare_means(comparisons = list(
     c('S1 L2/3', 'S1 L5'),
-    c('S1 L2/3', 'M1 L2/3'),
-    c('S1 L2/3', 'M1 L5'),
     c('S1 L5', 'M1 L2/3'),
+    c('S1 L2/3', 'M1 L2/3'),
     c('S1 L5', 'M1 L5'),
+    c('S1 L2/3', 'M1 L5')
+  ), method = 't.test', size = 2.5) +
+  stat_compare_means(comparisons = list(
     c('M1 L2/3', 'M1 L5')
   ), method = 't.test', size = 2.5) +
   theme_light(base_size = 8) +
