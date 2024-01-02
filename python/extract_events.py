@@ -1,18 +1,13 @@
-import pickle
 import mne
 import pandas as pd
-import numpy as np
 
-with open('.extract_events.py.pkl', 'wb') as file:
-    pickle.dump(snakemake, file)
-
-# with open('.extract_events.py.pkl', 'rb') as file:
-#     snakemake = pickle.load(file)
+pd.to_pickle(snakemake, '.extract_events.py.pkl')
+# snakemake = pd.read_pickle('.extract_events.py.pkl')
 
 with open(f'{snakemake.scriptdir}/methods.py', 'r') as file:
     exec(file.read())
 
-data = read_pickle(snakemake.input['filter'])
+data = pd.read_pickle(snakemake.input['filter'])
 
 tkeo_max_freq = snakemake.params['tkeoMaxFreq']
 
@@ -49,7 +44,7 @@ for i, channel in enumerate(tke.ch_names):
     )
 
     channel_events['Channel'] = channel
-    channel_events['ChannelId'] = i
+    channel_events['ChannelID'] = i
     events.append(channel_events)
 
 events = pd.concat(events, ignore_index = True)
@@ -57,4 +52,5 @@ events['EventId'] = [f'Event{x}' for x in range(len(events))]
 events['Amplitude'] = amplitude_all_events(events, data)
 
 print(f'Detected {len(events)} events through all the channels')
-save_pickle(events, snakemake.output['events'])
+
+pd.to_pickle(events, snakemake.output['events'])

@@ -1,12 +1,3 @@
-def read_pickle(filename):
-    import pickle
-
-    with open(filename, 'rb') as file:
-        data = pickle.load(file)
-
-    return data
-
-
 def save_pickle(data, filename):
     import pickle
 
@@ -124,61 +115,6 @@ def merge_short(data, min_break = 200):
         data = data.reset_index(drop = True)
 
     return data
-
-
-def determine_exact_time(event, data, rest_amplitude, expand_by = 0.25,
-                         window_size = 200, resample_factor = 4):
-    import numpy as np
-    import pandas as pd
-
-    sfreq = data.info['sfreq']
-
-    # Get event data
-    # Signal start and end times are expanded by a constant to ensure capturing the full event.
-    channel = event['Channel']
-    event_start = np.max([event['Start'] - expand_by, 0])
-    event_end = np.min([event['End'] + expand_by, np.max(data.times)])
-
-    event_data = data.copy().pick(picks = [channel]).crop(tmin = event_start, tmax = event_end)
-    y = event_data.get_data()[0]
-
-    # Resample the data
-    y = y[::resample_factor]
-    new_sfreq = int(sfreq / resample_factor)
-
-    # Smooth the signal by rolling average
-    smooth_y = np.convolve(np.abs(y), np.ones(window_size) / window_size, mode = 'same')
-    smooth_y = smooth_y - rest_amplitude
-
-    # Find where the movement happens
-    signal_over_threshold = smooth_y >= 0
-    change_indices = np.where(np.diff(signal_over_threshold))[0]
-
-    movement_data = pd.DataFrame({
-        'EventStart': np.insert(change_indices + 1, 0, 0),
-        'EventEnd': np.append(change_indices, len(signal_over_threshold))
-    })
-
-    movement_data['Movement'] = signal_over_threshold[movement_data['EventStart']]
-
-    # Calculate the movement time in points
-    movement_data['EventLength'] = list(movement_data['EventEnd'] - movement_data['EventStart'])
-    movement_data = movement_data[movement_data['Movement']]
-
-    # Recalculate the event start and end times as they are relative to the event start
-    movement_data['Start'] = movement_data['EventStart'] / new_sfreq + event_start
-    movement_data['Start'] = movement_data['Start'].apply(lambda x: 0 if x < 0 else x)
-
-    movement_data['End'] = movement_data['EventEnd'] / new_sfreq + event_start
-    movement_data['End'] = movement_data['End'].apply(lambda x: x if x < np.max(data.times) else np.max(data.times))
-
-    movement_data['Length'] = list(movement_data['End'] - movement_data['Start'])
-
-    movement_data['EventStart'] = movement_data['Start'] * sfreq
-    movement_data['EventEnd'] = movement_data['End'] * sfreq
-    movement_data['EventLength'] = list(movement_data['EventEnd'] - movement_data['EventStart'])
-
-    return movement_data
 
 
 def signal_amplitude(signal):

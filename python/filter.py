@@ -1,17 +1,14 @@
-import pickle
 import mne
 import numpy as np
+import pandas as pd
 
-with open('.filter.py.pkl', 'wb') as file:
-    pickle.dump(snakemake, file)
-
-# with open('.filter.py.pkl', 'rb') as file:
-#     snakemake = pickle.load(file)
+pd.to_pickle(snakemake, '.filter.py.pkl')
+# snakemake = pd.read_pickle('.filter.py.pkl')
 
 with open(f'{snakemake.scriptdir}/methods.py', 'r') as file:
     exec(file.read())
 
-raw = read_pickle(snakemake.input['raw'])
+raw = pd.read_pickle(snakemake.input['raw'])
 
 l_freq = snakemake.params['drop_below']
 h_freq = snakemake.params['drop_above']
@@ -29,4 +26,4 @@ if snakemake.params['scale']:
 else:
     print('Channels were not scaled')
 
-save_pickle(raw, snakemake.output['filter'])
+pd.to_pickle(raw, snakemake.output['filter'])

@@ -9,16 +9,6 @@ navbar:
       href: emg.html
     - text: Vm preprocessing
       href: vm.html
-#    - text: Vm During Events
-#      menu:
-#        - text: S1 L2/3
-#          href: S1_L23_events.html
-#        - text: S1 L5
-#          href: S1_L5_events.html
-#        - text: M1 L2/3
-#          href: M1_L23_events.html
-#        - text: M1 L5
-#          href: M1_L5_events.html
 output:
   html_document:
     self_contained: true

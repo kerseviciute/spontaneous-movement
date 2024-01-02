@@ -51,7 +51,7 @@ for index, sample in samples.iterrows():
     for i, event in sample_events.iterrows():
         start = event['Start']
         end = event['End']
-        channel = event['ChannelId']
+        channel = event['ChannelID']
 
         channel_data = sample_data.copy().crop(tmin = start, tmax = end)
 
