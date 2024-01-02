@@ -13,6 +13,7 @@ snakemake@source('R/rmd_setup.R')
 
 ## Supplementary files
 
+- [Figure 1](www/figure1.png)
 - [Figure 2](www/figure2.png)
 - [Figure 3](www/figure3.png)
 - [Figure 4](www/figure4.png)

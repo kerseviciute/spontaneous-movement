@@ -46,7 +46,7 @@ for index, sample in samples.iterrows():
 
     ap_data.append(pd.concat(event_data))
 
-    sample_events = pd.read_pickle(f'{prefix}/emg/no_movement_events.pkl')
+    sample_events = pd.read_csv(f'{prefix}/no_movement_events.csv')
     event_data = []
     for i, event in sample_events.iterrows():
         start = event['Start']

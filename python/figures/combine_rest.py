@@ -7,7 +7,7 @@ for index, sample in samples.iterrows():
     animal_id = sample['AnimalID']
     cell_name = sample['CellName']
     prefix = f'{snakemake.params["prefix"]}/{animal_id}/{cell_name}'
-    dt = pd.read_pickle(f'{prefix}/emg/no_movement_events.pkl')
+    dt = pd.read_csv(f'{prefix}/no_movement_events.csv')
     dt['AnimalID'] = animal_id
     dt['CellName'] = cell_name
     dt['SID'] = sample['SID']

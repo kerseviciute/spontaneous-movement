@@ -53,4 +53,4 @@ events['Amplitude'] = amplitude_all_events(events, data)
 
 print(f'Detected {len(events)} events through all the channels')
 
-pd.to_pickle(events, snakemake.output['events'])
+events.to_csv(snakemake.output['events'])

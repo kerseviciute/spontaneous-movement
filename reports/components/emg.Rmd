@@ -7,7 +7,7 @@ raw = pd.read_pickle(f'{prefix}/emg/raw.pkl')
 data = pd.read_pickle(f'{prefix}/emg/filter.pkl')
 movement_unfiltered = pd.read_csv(f'{prefix}/events1.csv')
 movement_events = pd.read_csv(f'{prefix}/events2.csv')
-no_movement_events = pd.read_pickle(f'{prefix}/emg/no_movement_events.pkl')
+no_movement_events = pd.read_csv(f'{prefix}/no_movement_events.csv')
 ```
 
 ```{python, include = TRUE}
