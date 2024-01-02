@@ -1,3 +1,6 @@
+saveRDS(snakemake, '.figure3.R.RDS')
+# snakemake <- readRDS('.figure3.R.RDS')
+
 library(data.table)
 library(ggplot2)
 library(dplyr)
@@ -7,9 +10,9 @@ library(cowplot)
 
 colors <- wes_palette('Zissou1')
 
-example_data <- fread('output/spontaneous-movement/figures/event_data.csv')
+event_data <- fread(snakemake@input$event_data)
 
-example_data <- example_data %>%
+event_data <- event_data %>%
   .[ , Time := Time - unique(EventStart) ] %>%
   .[ , EventStart := 0 ] %>%
   .[ , Type := 'None' ] %>%
@@ -18,10 +21,10 @@ example_data <- example_data %>%
   .[ Time > 0 & Time <= 0.2, Type := 'Movement onset' ] %>%
   .[ Time > 0.2 & Time <= 0.4, Type := 'Late movement' ]
 
-sample_data <- example_data[ , list(SID, Region) ] %>%
+sample_data <- event_data[ , list(SID, Region) ] %>%
   unique()
 
-average_data <- example_data %>%
+average_data <- event_data %>%
   .[ , list(TKEO = mean(TKEO), VM = mean(VM), EMG = mean(EMG)), by = list(Region, Time) ]
 
 plot <- list()
@@ -53,7 +56,7 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
     annotate('text', x = 0.05, y = max_vm, label = 'O', size = 2.5) +
     annotate('text', x = 0.3, y = max_vm, label = 'L', size = 2.5)
 
-  type_average <- example_data[ Region == region ] %>%
+  type_average <- event_data[ Region == region ] %>%
     .[ , list(VM = mean(VM)), by = list(SID, Type, EventId) ] %>%
     .[ Type != 'None' ] %>%
     .[ Type == 'Baseline', Type := 'B' ] %>%
@@ -78,7 +81,7 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
     theme(legend.position = 'none') +
     ylab('Average membrane potential, V (mV)')
 
-  ap_time <- fread('figures/all_ap_time.csv') %>%
+  ap_time <- fread(snakemake@input$ap_time) %>%
     .[ , SID := gsub(x = Trial, pattern = '.*(W[0-9]+_C[0-9]+)', replacement = '\\1') ] %>%
     merge(sample_data) %>%
     .[ , Time := Time - 0.4 ] %>%
@@ -144,4 +147,4 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
 
 final <- ggarrange(plotlist = plot, ncol = 4)
 
-ggsave(final, filename = 'figure3.png', height = 7.4, width = 8, bg = 'white', dpi = 600)
+ggsave(final, filename = snakemake@output$png, height = 7.4, width = 8, bg = 'white', dpi = 600)

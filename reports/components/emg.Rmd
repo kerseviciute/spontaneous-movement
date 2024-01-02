@@ -5,13 +5,13 @@ prefix = f'{r.prefix}/{r.animalId}/{r.cellName}'
 
 raw = pd.read_pickle(f'{prefix}/emg/raw.pkl')
 data = pd.read_pickle(f'{prefix}/emg/filter.pkl')
-movement_unfiltered = pd.read_pickle(f'{prefix}/emg/movement_events.pkl')
-movement_events = pd.read_pickle(f'{prefix}/emg/filtered_movement_events.pkl')
+movement_unfiltered = pd.read_csv(f'{prefix}/events1.csv')
+movement_events = pd.read_csv(f'{prefix}/events2.csv')
 no_movement_events = pd.read_pickle(f'{prefix}/emg/no_movement_events.pkl')
 ```
 
 ```{python, include = TRUE}
-plot_all_events(data, channels = data.ch_names, movement = movement_events, no_movement = no_movement_events, limit = 10)
+plot_all_events(data, channels = data.ch_names, movement = movement_events, limit = 10)
 ```
 
 **Figure 1.** Good quality events after filtering. Good quality movement events are marked in **red**, good quality

@@ -1,14 +1,24 @@
+saveRDS(snakemake, '.figure2.R.RDS')
+# snakemake <- readRDS('.figure2.R.RDS')
+
 library(data.table)
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
+library(foreach)
 
-movement <- fread('figures/movement_info.csv') %>%
+samples <- fread(snakemake@input$sample_sheet)
+
+movement <- foreach(file = snakemake@input$movement_information, .combine = rbind) %do% {
+  fread(file)
+} %>%
+  merge(samples) %>%
   .[ , .N, by = list(SID, Region) ] %>%
   .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
   .[ , Type := 'Move' ]
-no_movement <- fread('figures/no_movement_info.csv') %>%
+
+no_movement <- fread(snakemake@input$rest_information) %>%
   .[ , .N, by = list(SID, Region) ] %>%
   .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
@@ -39,15 +49,15 @@ p1 <- dt %>%
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black'))
 
-vm <- fread('figures/vm_data.csv')
+vm <- fread(snakemake@input$vm)
 
 averages <- vm %>%
- .[ , list(Average = mean(Vm), SD = sd(Vm)), by = list(SID, EventID, Type, Region) ] %>%
-   .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
+  .[ , list(Average = mean(Vm), SD = sd(Vm)), by = list(SID, EventID, Type, Region) ] %>%
+  .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
   .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ] %>%
   .[ Type == 'Movement', Type := 'Move' ] %>%
-  .[ Type == 'No movement', Type := 'Rest'] %>%
+  .[ Type == 'No movement', Type := 'Rest' ] %>%
   .[ , Type := factor(Type, c('Move', 'Rest')) ]
 
 p2 <- averages %>%
@@ -79,12 +89,12 @@ p3 <- averages %>%
   ylab('Membrane potential standard deviation (mV)')
 
 
-ap_data <- fread('figures/ap_data.csv') %>%
-.[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
+ap_data <- fread(snakemake@input$ap_count) %>%
+  .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
   .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ] %>%
   .[ Type == 'Movement', Type := 'Move' ] %>%
-  .[ Type == 'No movement', Type := 'Rest'] %>%
+  .[ Type == 'No movement', Type := 'Rest' ] %>%
   .[ , Type := factor(Type, c('Move', 'Rest')) ]
 
 p4 <- ap_data %>%
@@ -105,8 +115,8 @@ final <- ggarrange(
   p1, p2, p3, p4,
   ncol = 2,
   nrow = 2,
-  labels = letters[1:4],
+  labels = letters[ 1:4 ],
   font.label = list(size = 9)
 )
 
-ggsave(final, filename = 'figure2.png', height = 6, width = 8, bg = 'white', dpi = 600)
+ggsave(final, filename = snakemake@output$png, height = 6, width = 8, bg = 'white', dpi = 600)

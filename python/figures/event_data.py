@@ -4,7 +4,7 @@ import re
 pd.to_pickle(snakemake, '.extract_all_vm_emg.py.pkl')
 # snakemake = pd.read_pickle('.extract_average_vm_emg.py.pkl')
 
-with open(f'{snakemake.scriptdir}/../python/methods.py', 'r') as file:
+with open(f'{snakemake.scriptdir}/../methods.py', 'r') as file:
     exec(file.read())
 
 samples = pd.read_csv(snakemake.input['samples'])
@@ -17,7 +17,7 @@ for sid in samples['SID']:
 
     prefix = f'{snakemake.params["prefix"]}/{animal_id}/{cell_name}'
 
-    movement_events = pd.read_pickle(f'{prefix}/emg/filtered_movement_events.pkl')
+    movement_events = pd.read_csv(f'{prefix}/events2.csv')
     data = pd.read_pickle(f'{prefix}/emg/filter.pkl')
     vm = pd.read_pickle(f'{prefix}/vm/filter.pkl')
     tke = calculate_tkeo(data, h_freq = 20)
@@ -31,7 +31,7 @@ for sid in samples['SID']:
         tke_y = tke_data.get_data(picks = [event['Channel']])[0]
 
         vm_data = vm.copy().crop(tmin = event['Start'] - 0.4, tmax = event['Start'] + 0.4)
-        vm_y = vm_data.get_data(picks = [event['ChannelId']])[0]
+        vm_y = vm_data.get_data(picks = [event['ChannelID']])[0]
 
         region = samples[samples['SID'] == sid].iloc[0]['Region']
 

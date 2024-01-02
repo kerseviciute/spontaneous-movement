@@ -1,4 +1,4 @@
-project: spontaneous-movement
+project: spontaneous-movement-2
 
 sample_sheet: sample_sheet.csv
 
@@ -23,7 +23,7 @@ movement:
   tkeoThreshold: 0.1
   minEventLength: 0.1 # seconds
   minEventBreak: 0.15 # seconds
-  expandBy: 0.1 # seconds
+  expandBy: 0 # seconds
 
   #
   # Parameters for further detected movement event corrections and filtering
@@ -64,8 +64,7 @@ report:
     - index
     - emg
     - vm
-#    - index_vm
-#    - S1_L23_events
-#    - S1_L5_events
-#    - M1_L23_events
-#    - M1_L5_events
+  supplementary:
+    - figure2.png
+    - figure3.png
+    - figure4.png

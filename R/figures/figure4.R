@@ -1,3 +1,6 @@
+saveRDS(snakemake, '.figure4.R.RDS')
+# snakemake <- readRDS('.figure4.R.RDS')
+
 library(data.table)
 library(dplyr)
 library(ggplot2)
@@ -12,8 +15,8 @@ colors <- wes_palette('Zissou1')
 # P1 (a)
 ###############
 
-example_data <- fread('output/spontaneous-movement/figures/event_data.csv')
-example_data <- example_data %>%
+event_data <- fread(snakemake@input$event_data)
+event_data <- event_data %>%
   .[ , Time := Time - unique(EventStart) ] %>%
   .[ , EventStart := 0 ] %>%
   .[ , Type := 'None' ] %>%
@@ -25,7 +28,7 @@ example_data <- example_data %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
   .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ]
 
-average_data <- example_data %>%
+average_data <- event_data %>%
   .[ , list(TKEO = mean(TKEO), VM = mean(VM), EMG = mean(EMG)), by = list(Region, Time) ]
 
 p1 <- average_data %>%
@@ -50,7 +53,7 @@ p1 <- average_data %>%
 # P2 (b)
 ###############
 
-vm <- fread('figures/vm_data.csv')
+vm <- fread(snakemake@input$vm)
 
 averages <- vm %>%
   .[ , list(Average = mean(Vm), SD = sd(Vm)), by = list(SID, EventID, Type, Region) ] %>%
@@ -92,7 +95,7 @@ p2 <- averages %>%
 
 rest_mean <- averages[ Type == 'Rest', list(RestMean = mean(Average)), by = Region ]
 
-type_average <- example_data %>%
+type_average <- event_data %>%
   .[ , list(VM = mean(VM)), by = list(SID, Type, EventId, Region) ] %>%
   .[ Type != 'None' ] %>%
   .[ Type == 'B', Type := 'Baseline' ] %>%
@@ -145,4 +148,4 @@ final <- ggarrange(
   nrow = 2
 )
 
-ggsave(final, filename = 'figure4.png', height = 6, width = 8, bg = 'white', dpi = 600)
+ggsave(final, filename = snakemake@output$png, height = 6, width = 8, bg = 'white', dpi = 600)
