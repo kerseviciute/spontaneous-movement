@@ -19,7 +19,7 @@ movement:
   tkeoThreshold: 0.15
   maxTimeApart: 0.1 # Events closer will be merged
   maxLength: 2 # (s) Max event length
-  minLength: 0.5 # (s) Min event length
+  minLength: 0.4 # (s) Min event length
   calmBeforeEvent: 0.5 # (s) required period with no events before movement onset
   minAmplitude: 1.5
 
@@ -35,6 +35,7 @@ report:
     - emg
     - vm
   supplementary:
+    - figure1.png
     - figure2.png
     - figure3.png
     - figure4.png
