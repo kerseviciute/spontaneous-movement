@@ -38,7 +38,7 @@ p1 <- dt %>%
   .[ , Type := factor(Type, levels = c('Rest', 'Move')) ] %>%
   ggplot(aes(x = Region, y = N)) +
   facet_wrap(~Type, scale = 'free_y') +
-  geom_boxplot(outlier.alpha = 0) +
+  geom_boxplot(outlier.alpha = 0, linewidth = 0.25) +
   geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
   stat_compare_means(comparisons = list(
     c('S1 L2/3', 'S1 L5'),
@@ -57,7 +57,8 @@ p1 <- dt %>%
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
   scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
 # P2 (b)
@@ -78,12 +79,14 @@ averages <- vm %>%
   .[ , Type := factor(Type, levels = c('Rest', 'Move')) ]
 
 p2 <- averages %>%
-  ggplot(aes(x = Type, y = Average)) +
+  ggpaired(x = 'Type', y = 'Average', id = 'SID',
+           line.color = 'gray', line.size = 0.2, point.size = 0, color = 'white') +
   facet_wrap(~Region, ncol = 4) +
-  geom_boxplot(outlier.alpha = 0.25) +
-  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
+  geom_boxplot(outlier.alpha = 0, fill = NA, linewidth = 0.25) +
+  geom_point(aes(x = Type, y = Average, color = Animal), alpha = 0.5) +
   theme_light(base_size = 8) +
   stat_compare_means(
+    paired = TRUE,
     comparisons = list(c('Move', 'Rest')),
     method = 'wilcox',
     size = 2.5) +
@@ -93,29 +96,33 @@ p2 <- averages %>%
   xlab('') +
   ylab('Average membrane potential, V (mV)') +
   scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
 # P3 (c)
 ###############
 
 p3 <- averages %>%
-  ggplot(aes(x = Type, y = SD)) +
+  ggpaired(x = 'Type', y = 'SD', id = 'SID',
+           line.color = 'gray', line.size = 0.2, point.size = 0, color = 'white') +
   facet_wrap(~Region, ncol = 4) +
-  geom_boxplot(outlier.alpha = 0.25) +
-  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
+  geom_boxplot(outlier.alpha = 0, fill = NA, linewidth = 0.25) +
+  geom_point(aes(x = Type, y = SD, color = Animal), alpha = 0.5) +
   theme_light(base_size = 8) +
   stat_compare_means(
+    paired = TRUE,
     comparisons = list(c('Move', 'Rest')),
-    method = 'wilcox.test',
+    method = 'wilcox',
     size = 2.5) +
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
-  theme(legend.position = 'none') +
+  theme(legend.position = 'top') +
   xlab('') +
-  ylab('Membrane potential standard deviation (mV)') +
+  ylab('Average membrane potential, V (mV)') +
   scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
 # P4 (d)
@@ -124,7 +131,7 @@ p3 <- averages %>%
 p4 <- averages %>%
   ggplot(aes(x = Region, y = Average)) +
   facet_wrap(~Type) +
-  geom_boxplot(outlier.alpha = 0) +
+  geom_boxplot(outlier.alpha = 0, linewidth = 0.25) +
   geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
   theme(legend.position = 'none') +
   stat_compare_means(comparisons = list(
@@ -144,7 +151,8 @@ p4 <- averages %>%
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
   scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
 # P5 (e)
@@ -163,12 +171,15 @@ ap_data <- fread(snakemake@input$ap_count) %>%
   .[ , Type := factor(Type, levels = c('Rest', 'Move')) ]
 
 p5 <- ap_data %>%
-  ggplot(aes(x = Type, y = log(CountAP + 1))) +
+  .[ , y := log(CountAP + 1) ] %>%
+  ggpaired(x = 'Type', y = 'y', id = 'SID',
+           line.color = 'gray', line.size = 0.2, point.size = 0, color = 'white') +
   facet_wrap(~Region, ncol = 4, scale = 'free_y') +
-  geom_boxplot(fill = 'white', alpha = 0.1, outlier.alpha = 0.2) +
-  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
+  geom_boxplot(outlier.alpha = 0, fill = NA, linewidth = 0.25) +
+  geom_point(aes(x = Type, y = y, color = Animal), alpha = 0.5) +
   theme_light(base_size = 8) +
   stat_compare_means(
+    paired = TRUE,
     comparisons = list(c('Move', 'Rest')),
     method = 'wilcox',
     size = 2.5) +
@@ -176,7 +187,8 @@ p5 <- ap_data %>%
   theme(strip.text = element_text(colour = 'black')) +
   theme(legend.position = 'none') +
   xlab('') +
-  ylab('Average AP coount') +
+  ylab('Average membrane potential, V (mV)') +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
   scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
   scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
 
@@ -206,4 +218,4 @@ final <- ggarrange(
   common.legend = TRUE
 )
 
-  ggsave(final, filename = snakemake@output$png, height = 6, width = 8, bg = 'white', dpi = 1000)
+ggsave(final, filename = snakemake@output$png, height = 6, width = 8, bg = 'white', dpi = 1000)

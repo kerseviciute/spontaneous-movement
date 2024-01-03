@@ -65,8 +65,8 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
     .[ , Animal := factor(Animal, levels = c('W1', 'W2', 'W3', 'W4')) ]
 
   p2 <- type_average %>%
-    ggpaired(x = "Type", y = "VM", id = "SID", color = "Type",
-             line.color = "gray", line.size = 0.2, point.size = 0.75) +
+    ggpaired(x = 'Type', y = 'VM', id = 'SID', color = 'Type',
+             line.color = 'gray', line.size = 0.2, point.size = 0.75) +
     stat_compare_means(
       paired = TRUE,
       comparisons = list(c('B', 'P'), c('P', 'O')),
