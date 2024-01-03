@@ -94,9 +94,9 @@ p2 <- averages %>%
   theme(strip.text = element_text(colour = 'black')) +
   theme(legend.position = 'top') +
   xlab('') +
-  ylab('Average membrane potential, V (mV)') +
-  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  ylab('Membrane potential, V (mV)') +
+  scale_color_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
@@ -119,9 +119,9 @@ p3 <- averages %>%
   theme(strip.text = element_text(colour = 'black')) +
   theme(legend.position = 'top') +
   xlab('') +
-  ylab('Average membrane potential, V (mV)') +
-  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  ylab('Membrane potential SD, V (mV)') +
+  scale_color_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
@@ -147,7 +147,7 @@ p4 <- averages %>%
   theme_light(base_size = 8) +
   xlab('') +
   theme(legend.position = 'none') +
-  ylab('Average membrane potential, V (mV)') +
+  ylab('Membrane potential, V (mV)') +
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
   scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
@@ -187,7 +187,7 @@ p5 <- ap_data %>%
   theme(strip.text = element_text(colour = 'black')) +
   theme(legend.position = 'none') +
   xlab('') +
-  ylab('Average membrane potential, V (mV)') +
+  ylab('Membrane potential, V (mV)') +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
   scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
   scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])

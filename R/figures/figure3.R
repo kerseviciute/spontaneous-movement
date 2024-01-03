@@ -65,11 +65,13 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
     .[ , Animal := factor(Animal, levels = c('W1', 'W2', 'W3', 'W4')) ]
 
   p2 <- type_average %>%
-    ggpaired(x = 'Type', y = 'VM', id = 'SID', color = 'Type',
-             line.color = 'gray', line.size = 0.2, point.size = 0.75) +
+    ggpaired(x = 'Type', y = 'VM', id = 'SID',
+             line.color = 'gray', line.size = 0.2, point.size = 0, color = 'white') +
+    geom_boxplot(aes(color = Type), outlier.alpha = 0, fill = NA, linewidth = 0.25) +
+    geom_point(aes(x = Type, y = VM, color = Type), alpha = 0.75, size = 0.75) +
     stat_compare_means(
       paired = TRUE,
-      comparisons = list(c('B', 'P'), c('P', 'O')),
+      comparisons = list(c('B', 'P'), c('P', 'O'), c('B', 'L')),
       method = 'wilcox', size = 2.5) +
     stat_compare_means(
       paired = TRUE,
@@ -77,7 +79,7 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
       method = 'wilcox', size = 2.5) +
     theme_light(base_size = 8) +
     theme(legend.position = 'none') +
-    ylab('Average membrane potential, V (mV)') +
+    ylab('Membrane potential, V (mV)') +
     scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
     xlab('') +
     scale_colour_manual(values = c('B' = colors[ 1 ], 'P' = colors[ 2 ], 'O' = colors[ 3 ], 'L' = colors[ 4 ]))

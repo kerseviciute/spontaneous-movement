@@ -290,8 +290,7 @@ rule figure3:
 
 rule figure4:
   input:
-    event_data = 'output/{project}/figures/event_data.csv',
-    vm = 'output/{project}/figures/combined_vm_data.csv'
+    event_data = 'output/{project}/figures/event_data.csv'
   output:
     png = '{project}/www/figure4.png'
   conda: 'env/r.yml'
