@@ -6,6 +6,7 @@ library(dplyr)
 library(ggplot2)
 library(ggpubr)
 library(foreach)
+library(RColorBrewer)
 
 samples <- fread(snakemake@input$sample_sheet)
 
@@ -24,60 +25,85 @@ no_movement <- fread(snakemake@input$rest_information) %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
   .[ , Type := 'Rest' ]
 
+###############
+# P1 (a)
+###############
+
 dt <- rbind(movement, no_movement) %>%
-  .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ]
+  .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ] %>%
+  .[ , Animal := gsub(x = SID, pattern = '(W[0-9]).*', replacement = '\\1') ] %>%
+  .[ , Animal := factor(Animal, levels = c('W1', 'W2', 'W3', 'W4')) ]
 
 p1 <- dt %>%
+  .[ , Type := factor(Type, levels = c('Rest', 'Move')) ] %>%
   ggplot(aes(x = Region, y = N)) +
   facet_wrap(~Type, scale = 'free_y') +
   geom_boxplot(outlier.alpha = 0) +
-  geom_jitter(height = 0, width = 0.2, alpha = 0.5) +
+  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
   stat_compare_means(comparisons = list(
     c('S1 L2/3', 'S1 L5'),
     c('S1 L5', 'M1 L2/3'),
     c('S1 L2/3', 'M1 L2/3'),
     c('S1 L5', 'M1 L5'),
     c('S1 L2/3', 'M1 L5')
-  ), method = 't.test', size = 2.5) +
+  ), method = 'wilcox', size = 2.5) +
   stat_compare_means(comparisons = list(
     c('M1 L2/3', 'M1 L5')
-  ), method = 't.test', size = 2.5) +
+  ), method = 'wilcox', size = 2.5) +
   theme_light(base_size = 8) +
   xlab('') +
   theme(legend.position = 'none') +
   ylab('Number of events') +
   theme(strip.background = element_rect(fill = 'white')) +
-  theme(strip.text = element_text(colour = 'black'))
+  theme(strip.text = element_text(colour = 'black')) +
+  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+
+###############
+# P2 (b)
+###############
 
 vm <- fread(snakemake@input$vm)
 
 averages <- vm %>%
-  .[ , list(Average = mean(Vm), SD = sd(Vm)), by = list(SID, EventID, Type, Region) ] %>%
+  .[ , list(Average = mean(Vm), SD = sd(Vm)), by = list(SID, Type, Region) ] %>%
   .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
   .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ] %>%
   .[ Type == 'Movement', Type := 'Move' ] %>%
   .[ Type == 'No movement', Type := 'Rest' ] %>%
-  .[ , Type := factor(Type, c('Move', 'Rest')) ]
+  .[ , Type := factor(Type, c('Move', 'Rest')) ] %>%
+  .[ , Animal := gsub(x = SID, pattern = '(W[0-9]).*', replacement = '\\1') ] %>%
+  .[ , Animal := factor(Animal, levels = c('W1', 'W2', 'W3', 'W4')) ] %>%
+  .[ , Type := factor(Type, levels = c('Rest', 'Move')) ]
 
 p2 <- averages %>%
   ggplot(aes(x = Type, y = Average)) +
   facet_wrap(~Region, ncol = 4) +
   geom_boxplot(outlier.alpha = 0.25) +
+  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
   theme_light(base_size = 8) +
   stat_compare_means(
     comparisons = list(c('Move', 'Rest')),
-    method = 't.test',
+    method = 'wilcox',
     size = 2.5) +
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
+  theme(legend.position = 'top') +
   xlab('') +
-  ylab('Average membrane potential, V (mV)')
+  ylab('Average membrane potential, V (mV)') +
+  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+
+###############
+# P3 (c)
+###############
 
 p3 <- averages %>%
   ggplot(aes(x = Type, y = SD)) +
   facet_wrap(~Region, ncol = 4) +
   geom_boxplot(outlier.alpha = 0.25) +
+  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
   theme_light(base_size = 8) +
   stat_compare_means(
     comparisons = list(c('Move', 'Rest')),
@@ -85,9 +111,44 @@ p3 <- averages %>%
     size = 2.5) +
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
+  theme(legend.position = 'none') +
   xlab('') +
-  ylab('Membrane potential standard deviation (mV)')
+  ylab('Membrane potential standard deviation (mV)') +
+  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
 
+###############
+# P4 (d)
+###############
+
+p4 <- averages %>%
+  ggplot(aes(x = Region, y = Average)) +
+  facet_wrap(~Type) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
+  theme(legend.position = 'none') +
+  stat_compare_means(comparisons = list(
+    c('S1 L2/3', 'S1 L5'),
+    c('S1 L5', 'M1 L2/3'),
+    c('S1 L2/3', 'M1 L2/3'),
+    c('S1 L5', 'M1 L5'),
+    c('S1 L2/3', 'M1 L5')
+  ), method = 'wilcox', size = 2.5) +
+  stat_compare_means(comparisons = list(
+    c('M1 L2/3', 'M1 L5')
+  ), method = 'wilcox', size = 2.5) +
+  theme_light(base_size = 8) +
+  xlab('') +
+  theme(legend.position = 'none') +
+  ylab('Average membrane potential, V (mV)') +
+  theme(strip.background = element_rect(fill = 'white')) +
+  theme(strip.text = element_text(colour = 'black')) +
+  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+
+###############
+# P5 (e)
+###############
 
 ap_data <- fread(snakemake@input$ap_count) %>%
   .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
@@ -95,28 +156,54 @@ ap_data <- fread(snakemake@input$ap_count) %>%
   .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ] %>%
   .[ Type == 'Movement', Type := 'Move' ] %>%
   .[ Type == 'No movement', Type := 'Rest' ] %>%
-  .[ , Type := factor(Type, c('Move', 'Rest')) ]
+  .[ , Type := factor(Type, c('Move', 'Rest')) ] %>%
+  .[ , list(CountAP = mean(CountAP)), by = list(SID, Type, Region) ] %>%
+  .[ , Animal := gsub(x = SID, pattern = '(W[0-9]).*', replacement = '\\1') ] %>%
+  .[ , Animal := factor(Animal, levels = c('W1', 'W2', 'W3', 'W4')) ] %>%
+  .[ , Type := factor(Type, levels = c('Rest', 'Move')) ]
 
-p4 <- ap_data %>%
+p5 <- ap_data %>%
   ggplot(aes(x = Type, y = log(CountAP + 1))) +
   facet_wrap(~Region, ncol = 4, scale = 'free_y') +
   geom_boxplot(fill = 'white', alpha = 0.1, outlier.alpha = 0.2) +
+  geom_jitter(aes(color = Animal), height = 0, width = 0.2, alpha = 0.5) +
   theme_light(base_size = 8) +
   stat_compare_means(
     comparisons = list(c('Move', 'Rest')),
-    method = 'wilcox.test',
+    method = 'wilcox',
     size = 2.5) +
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
+  theme(legend.position = 'none') +
   xlab('') +
-  ylab('Number of AP, log')
+  ylab('Average AP coount') +
+  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
 
-final <- ggarrange(
-  p1, p2, p3, p4,
+p123 <- ggarrange(
+  p1, p2, p3,
+  widths = c(0.4, 0.3, 0.3),
+  ncol = 3,
+  nrow = 1,
+  labels = letters[ 1:3 ],
+  font.label = list(size = 9),
+  common.legend = TRUE
+)
+
+p45 <- ggarrange(
+  p4, p5,
   ncol = 2,
-  nrow = 2,
-  labels = letters[ 1:4 ],
+  nrow = 1,
+  labels = letters[ 4:5 ],
   font.label = list(size = 9)
 )
 
-ggsave(final, filename = snakemake@output$png, height = 6, width = 8, bg = 'white', dpi = 600)
+final <- ggarrange(
+  p123, p45,
+  heights = c(0.55, 0.45),
+  ncol = 1,
+  nrow = 2,
+  common.legend = TRUE
+)
+
+  ggsave(final, filename = snakemake@output$png, height = 6, width = 8, bg = 'white', dpi = 1000)
