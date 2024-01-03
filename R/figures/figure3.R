@@ -28,7 +28,6 @@ average_data <- event_data %>%
   .[ , list(TKEO = mean(TKEO), VM = mean(VM), EMG = mean(EMG)), by = list(Region, Time) ]
 
 plot <- list()
-
 for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
   region_average <- average_data[ Region == region ]
 
@@ -45,41 +44,43 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
     annotate('rect', xmin = 0.2, xmax = 0.4, ymin = -Inf, ymax = Inf, fill = colors[ 4 ], size = 0.5, alpha = 0.5) +
     geom_line(aes(x = Time, y = VM), color = colors[ 5 ], linewidth = 0.25) +
     theme_light(base_size = 8) +
-    xlab('Time, t (s)') +
     ylab('Membrane\npotential, V (mV)') +
-    xlim(-0.4, 0.4) +
     ggtitle(region_label) +
     theme(plot.title = element_text(hjust = 0.5, size = 9, face = 'bold')) +
-    scale_x_continuous(breaks = c(-0.4, -0.2, 0, 0.2, 0.4)) +
+    scale_x_continuous(name = 'Time, t (s)', breaks = c(-0.4, -0.2, 0, 0.2, 0.4), limits = c(-0.4, 0.4)) +
     annotate('text', x = -0.3, y = max_vm, label = 'B', size = 2.5) +
     annotate('text', x = -0.05, y = max_vm, label = 'P', size = 2.5) +
     annotate('text', x = 0.05, y = max_vm, label = 'O', size = 2.5) +
     annotate('text', x = 0.3, y = max_vm, label = 'L', size = 2.5)
 
   type_average <- event_data[ Region == region ] %>%
-    .[ , list(VM = mean(VM)), by = list(SID, Type, EventId) ] %>%
+    .[ , list(VM = mean(VM)), by = list(SID, Type) ] %>%
     .[ Type != 'None' ] %>%
     .[ Type == 'Baseline', Type := 'B' ] %>%
     .[ Type == 'Pre-movement', Type := 'P' ] %>%
     .[ Type == 'Movement onset', Type := 'O' ] %>%
     .[ Type == 'Late movement', Type := 'L' ] %>%
-    .[ , Type := factor(Type, levels = c('B', 'P', 'O', 'L')) ]
+    .[ , Type := factor(Type, levels = c('B', 'P', 'O', 'L')) ] %>%
+    .[ , Animal := gsub(x = SID, pattern = '(W[0-9]).*', replacement = '\\1') ] %>%
+    .[ , Animal := factor(Animal, levels = c('W1', 'W2', 'W3', 'W4')) ]
 
   p2 <- type_average %>%
-    ggplot(aes(x = Type, y = VM, color = Type)) +
-    geom_boxplot(outlier.alpha = 0) +
-    geom_jitter(height = 0, width = 0.2, alpha = 0.2) +
-    theme_light(base_size = 8) +
-    xlab('') +
-    scale_colour_manual(values = c('B' = colors[ 1 ], 'P' = colors[ 2 ], 'O' = colors[ 3 ], 'L' = colors[ 4 ])) +
+    ggpaired(x = "Type", y = "VM", id = "SID", color = "Type",
+             line.color = "gray", line.size = 0.2, point.size = 0.75) +
     stat_compare_means(
+      paired = TRUE,
       comparisons = list(c('B', 'P'), c('P', 'O')),
-      method = 't.test', size = 2.5) +
-        stat_compare_means(
+      method = 'wilcox', size = 2.5) +
+    stat_compare_means(
+      paired = TRUE,
       comparisons = list(c('O', 'L')),
-      method = 't.test', size = 2.5) +
+      method = 'wilcox', size = 2.5) +
+    theme_light(base_size = 8) +
     theme(legend.position = 'none') +
-    ylab('Average membrane potential, V (mV)')
+    ylab('Average membrane potential, V (mV)') +
+    scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
+    xlab('') +
+    scale_colour_manual(values = c('B' = colors[ 1 ], 'P' = colors[ 2 ], 'O' = colors[ 3 ], 'L' = colors[ 4 ]))
 
   ap_time <- fread(snakemake@input$ap_time) %>%
     .[ , SID := gsub(x = Trial, pattern = '.*(W[0-9]+_C[0-9]+)', replacement = '\\1') ] %>%
@@ -97,49 +98,24 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
     geom_histogram(aes(x = Time), fill = 'white', color = 'black', binwidth = 0.025) +
     theme_light(base_size = 8) +
     ylab('AP count') +
-    xlab('Time, t (s)') +
     theme(strip.background = element_rect(fill = 'white')) +
     theme(strip.text = element_text(colour = 'black')) +
-    scale_x_continuous(breaks = c(-0.4, -0.2, 0, 0.2, 0.4)) +
+    scale_x_continuous(name = 'Time, t (s)', breaks = c(-0.4, -0.2, 0, 0.2, 0.4)) +
     expand_limits(y = c(0, 70)) +
     annotate('text', x = -0.3, y = 69, label = 'B', size = 2.5) +
     annotate('text', x = -0.05, y = 69, label = 'P', size = 2.5) +
     annotate('text', x = 0.05, y = 69, label = 'O', size = 2.5) +
     annotate('text', x = 0.3, y = 69, label = 'L', size = 2.5)
 
-  max_trial <- ap_time[ , unique(Trial) ] %>% length() + 1
-
-  p4 <- ap_time %>%
-    ggplot() +
-    annotate('rect', xmin = -0.4, xmax = -0.2, ymin = -Inf, ymax = Inf, fill = colors[ 1 ], size = 0.5, alpha = 0.5) +
-    annotate('rect', xmin = -0.1, xmax = 0, ymin = -Inf, ymax = Inf, fill = colors[ 2 ], size = 0.5, alpha = 0.5) +
-    annotate('rect', xmin = 0, xmax = 0.1, ymin = -Inf, ymax = Inf, fill = colors[ 3 ], size = 0.5, alpha = 0.5) +
-    annotate('rect', xmin = 0.2, xmax = 0.4, ymin = -Inf, ymax = Inf, fill = colors[ 4 ], size = 0.5, alpha = 0.5) +
-    geom_point(aes(x = Time, y = Trial), color = 'black', size = 0.5, alpha = 0.75) +
-    theme_light(base_size = 8) +
-    xlab('Time, t (s)') +
-    theme(axis.text.y = element_blank()) +
-    theme(axis.ticks.y = element_blank()) +
-    theme(strip.background = element_blank()) +
-    theme(strip.text = element_blank()) +
-    ylab('Movement event') +
-    annotate('text', x = -0.3, y = max_trial + max_trial * 0.08, label = 'B', size = 2.5) +
-    annotate('text', x = -0.05, y = max_trial + max_trial * 0.08, label = 'P', size = 2.5) +
-    annotate('text', x = 0.05, y = max_trial + max_trial * 0.08, label = 'O', size = 2.5) +
-    annotate('text', x = 0.3, y = max_trial + max_trial * 0.08, label = 'L', size = 2.5) +
-    theme(panel.grid = element_blank()) +
-    expand_limits(y = c(0, max_trial + max_trial * 0.1))
-
   p5 <- ggdraw() +
-    draw_plot(p1, 0, 0.75, 1, 0.25) +
-    draw_plot(p2, 0.068, 0.4, 1 - 0.068, 0.35) +
-    draw_plot(p3, 0.08, 0.2, 1 - 0.08, 0.2) +
-    draw_plot(p4, 0.138, 0, 1 - 0.138, 0.2)
+    draw_plot(p1, 0, 0.7, 1, 0.3) +
+    draw_plot(p2, 0.068, 0.25, 1 - 0.068, 0.45) +
+    draw_plot(p3, 0.08, 0, 1 - 0.08, 0.25)
 
   # Only for the first in list
   if (region == 'S1_L23') {
     p5 <- p5 +
-      draw_plot_label(letters[ 1:4 ], x = c(0, 0, 0, 0), y = c(1, 0.75, 0.4, 0.2), size = 9)
+      draw_plot_label(letters[ 1:3 ], x = c(0, 0, 0), y = c(1, 0.7, 0.25), size = 9)
   }
 
   plot[[region]] <- p5
@@ -147,4 +123,4 @@ for (region in c('S1_L23', 'S1_L5', 'M1_L23', 'M1_L5')) {
 
 final <- ggarrange(plotlist = plot, ncol = 4)
 
-ggsave(final, filename = snakemake@output$png, height = 7.4, width = 8, bg = 'white', dpi = 600)
+ggsave(final, filename = snakemake@output$png, height = 5, width = 8, bg = 'white', dpi = 1000)
