@@ -52,12 +52,12 @@ p1 <- dt %>%
   ), method = 'wilcox', size = 2.5) +
   theme_light(base_size = 8) +
   xlab('') +
-  theme(legend.position = 'none') +
+  theme(legend.position = 'top') +
   ylab('Number of events') +
   theme(strip.background = element_rect(fill = 'white')) +
   theme(strip.text = element_text(colour = 'black')) +
-  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_color_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
@@ -187,10 +187,10 @@ p5 <- ap_data %>%
   theme(strip.text = element_text(colour = 'black')) +
   theme(legend.position = 'none') +
   xlab('') +
-  ylab('Membrane potential, V (mV)') +
+  ylab('Number of AP, log') +
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
-  scale_color_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
-  scale_fill_manual(name = '', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
+  scale_color_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ]) +
+  scale_fill_manual(name = 'Animal', values = brewer.pal(11, 'RdBu')[ c(1, 2, 10, 11) ])
 
 p123 <- ggarrange(
   p1, p2, p3,
@@ -214,8 +214,7 @@ final <- ggarrange(
   p123, p45,
   heights = c(0.55, 0.45),
   ncol = 1,
-  nrow = 2,
-  common.legend = TRUE
+  nrow = 2
 )
 
 ggsave(final, filename = snakemake@output$png, height = 6, width = 8, bg = 'white', dpi = 1000)
