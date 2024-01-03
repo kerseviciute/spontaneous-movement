@@ -67,7 +67,7 @@ p1 <- dt %>%
 vm <- fread(snakemake@input$vm)
 
 averages <- vm %>%
-  .[ , list(Average = mean(Vm), SD = sd(Vm)), by = list(SID, Type, Region) ] %>%
+  .[ , list(Average = mean(Vm)), by = list(SID, Type, Region) ] %>%
   .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
   .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
   .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ] %>%
@@ -103,7 +103,21 @@ p2 <- averages %>%
 # P3 (c)
 ###############
 
-p3 <- averages %>%
+# TODO: exclude the AP times properly!
+averages_sd <- vm %>%
+  .[ Vm < -20 ] %>%
+  .[ , list(SD = sd(Vm)), by = list(SID, Type, Region) ] %>%
+  .[ , Region := gsub(x = Region, pattern = '_', replacement = ' ') ] %>%
+  .[ , Region := gsub(x = Region, pattern = '23', replacement = '2/3') ] %>%
+  .[ , Region := factor(Region, levels = c('S1 L2/3', 'S1 L5', 'M1 L2/3', 'M1 L5')) ] %>%
+  .[ Type == 'Movement', Type := 'Move' ] %>%
+  .[ Type == 'No movement', Type := 'Rest' ] %>%
+  .[ , Type := factor(Type, c('Move', 'Rest')) ] %>%
+  .[ , Animal := gsub(x = SID, pattern = '(W[0-9]).*', replacement = '\\1') ] %>%
+  .[ , Animal := factor(Animal, levels = c('W1', 'W2', 'W3', 'W4')) ] %>%
+  .[ , Type := factor(Type, levels = c('Rest', 'Move')) ]
+
+p3 <- averages_sd %>%
   ggpaired(x = 'Type', y = 'SD', id = 'SID',
            line.color = 'gray', line.size = 0.2, point.size = 0, color = 'white') +
   facet_wrap(~Region, ncol = 4) +
@@ -125,7 +139,7 @@ p3 <- averages %>%
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
-# P4 (d)
+# P4 (e)
 ###############
 
 p4 <- averages %>%
@@ -155,7 +169,7 @@ p4 <- averages %>%
   scale_y_continuous(expand = expansion(mult = c(0.1, 0.1)))
 
 ###############
-# P5 (e)
+# P5 (d)
 ###############
 
 ap_data <- fread(snakemake@input$ap_count) %>%
@@ -203,7 +217,7 @@ p123 <- ggarrange(
 )
 
 p45 <- ggarrange(
-  p4, p5,
+  p5, p4,
   ncol = 2,
   nrow = 1,
   labels = letters[ 4:5 ],
