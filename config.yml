@@ -27,7 +27,7 @@ no_movement:
   tkeoThreshold: 0.025
   minLength: 0.5 # seconds
   maxTimeApart: 0.1 # seconds
-  expandBy: -0.2 # seconds (will shorten the event by cutting the edges off)
+  expandBy: -0.1 # seconds (will shorten the event by cutting the edges off)
 
 report:
   pages:

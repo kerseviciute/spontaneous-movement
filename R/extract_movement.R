@@ -1,5 +1,5 @@
-saveRDS(snakemake, '.extract_events.R.RDS')
-# snakemake <- readRDS('.extract_events.R.RDS')
+saveRDS(snakemake, '.extract_movement.R.RDS')
+# snakemake <- readRDS('.extract_movement.R.RDS')
 
 library(data.table, verbose = FALSE, quietly = TRUE, warn.conflicts = FALSE)
 library(dplyr, verbose = FALSE, quietly = TRUE, warn.conflicts = FALSE)

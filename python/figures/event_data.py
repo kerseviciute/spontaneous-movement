@@ -17,7 +17,7 @@ for sid in samples['SID']:
 
     prefix = f'{snakemake.params["prefix"]}/{animal_id}/{cell_name}'
 
-    movement_events = pd.read_csv(f'{prefix}/events2.csv')
+    movement_events = pd.read_csv(f'{prefix}/movement_final.csv')
     data = pd.read_pickle(f'{prefix}/emg/filter.pkl')
     vm = pd.read_pickle(f'{prefix}/vm/filter.pkl')
     tke = calculate_tkeo(data, h_freq = 20)

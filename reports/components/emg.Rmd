@@ -5,9 +5,9 @@ prefix = f'{r.prefix}/{r.animalId}/{r.cellName}'
 
 raw = pd.read_pickle(f'{prefix}/emg/raw.pkl')
 data = pd.read_pickle(f'{prefix}/emg/filter.pkl')
-movement_unfiltered = pd.read_csv(f'{prefix}/events1.csv')
-movement_events = pd.read_csv(f'{prefix}/events2.csv')
-no_movement_events = pd.read_csv(f'{prefix}/no_movement_events.csv')
+movement_unfiltered = pd.read_csv(f'{prefix}/movement_all.csv')
+movement_events = pd.read_csv(f'{prefix}/movement_final.csv')
+no_movement_events = pd.read_csv(f'{prefix}/no_movement_final.csv')
 ```
 
 ```{python, include = TRUE}

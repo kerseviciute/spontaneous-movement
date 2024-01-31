@@ -11,7 +11,7 @@ for index, sample in samples.iterrows():
 
     sample_data = pd.read_pickle(f'{prefix}/vm/filter.pkl')
 
-    sample_events = pd.read_csv(f'{prefix}/events2.csv')
+    sample_events = pd.read_csv(f'{prefix}/movement_final.csv')
     event_data = []
     for i, event in sample_events.iterrows():
         start = event['Start']
@@ -31,7 +31,7 @@ for index, sample in samples.iterrows():
 
     final_data.append(pd.concat(event_data))
 
-    sample_events = pd.read_csv(f'{prefix}/no_movement_events.csv')
+    sample_events = pd.read_csv(f'{prefix}/no_movement_final.csv')
     event_data = []
     for i, event in sample_events.iterrows():
         start = event['Start']

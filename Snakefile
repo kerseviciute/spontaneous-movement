@@ -84,8 +84,8 @@ rule extract_events_move:
   input:
     data = 'output/{project}/{animal_id}/{cell_name}/emg_data.csv'
   output:
-    all_events = 'output/{project}/{animal_id}/{cell_name}/events1.csv',
-    events = 'output/{project}/{animal_id}/{cell_name}/events2.csv'
+    all_events = 'output/{project}/{animal_id}/{cell_name}/movement_all.csv',
+    events = 'output/{project}/{animal_id}/{cell_name}/movement_final.csv'
   params:
     tkeoThreshold = config['movement']['tkeoThreshold'],
     maxTimeApart = config['movement']['maxTimeApart'],
@@ -94,26 +94,24 @@ rule extract_events_move:
     calmBeforeEvent = config['movement']['calmBeforeEvent'],
     minAmplitude = config['movement']['minAmplitude']
   conda: 'env/r.yml'
-  script: 'R/extract_events.R'
+  script: 'R/extract_movement.R'
 
 #
 # Analyse filtered EMG data and detect no movement episodes.
 #
-# TODO: use the same R script as for movement detection
 rule extract_events_no_move:
   input:
-    filter = 'output/{project}/{sid}/{cell}/emg/filter.pkl'
+    data = 'output/{project}/{animal_id}/{cell_name}/emg_data.csv'
   output:
-    events = 'output/{project}/{sid}/{cell}/no_movement_events.csv'
+    all_events = 'output/{project}/{animal_id}/{cell_name}/no_movement_all.csv',
+    events = 'output/{project}/{animal_id}/{cell_name}/no_movement_final.csv'
   params:
-    tkeoMaxFreq = config['movement']['tkeoMaxFreq'],
-    threshold = config['no_movement']['tkeoThreshold'],
+    tkeoThreshold = config['no_movement']['tkeoThreshold'],
+    maxTimeApart = config['no_movement']['maxTimeApart'],
     minLength = config['no_movement']['minLength'],
-    minBreak = config['no_movement']['maxTimeApart'],
-    expandBy = config['no_movement']['expandBy'],
-    detectMovement = False
-  conda: 'env/mne.yml'
-  script: 'python/extract_events.py'
+    expandBy = config['no_movement']['expandBy']
+  conda: 'env/r.yml'
+  script: 'R/extract_no_movement.R'
 
 #
 # Convert the raw VM .txt files to MNE objects for further processing.
@@ -164,9 +162,9 @@ rule report_emg:
     samples = config['sample_sheet'],
     raw = expand('output/{{project}}/{sid}/emg/raw.pkl', sid = samples['Location']),
     data = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
-    no_movement_filtered = expand('output/{{project}}/{sid}/no_movement_events.csv', sid = samples['Location']),
-    movement = expand('output/{{project}}/{sid}/events1.csv', sid = samples['Location']),
-    movement_filtered = expand('output/{{project}}/{sid}/events2.csv', sid = samples['Location'])
+    no_movement_filtered = expand('output/{{project}}/{sid}/no_movement_final.csv', sid = samples['Location']),
+    movement = expand('output/{{project}}/{sid}/movement_all.csv', sid = samples['Location']),
+    movement_filtered = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location'])
   output:
     report = '{project}/emg.html'
   params:
@@ -180,7 +178,7 @@ rule report_vm:
   input:
     samples = config['sample_sheet'],
     data = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location']),
-    movement_filtered = expand('output/{{project}}/{sid}/events2.csv', sid = samples['Location'])
+    movement_filtered = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location'])
   output:
     report = '{project}/vm.html'
   params:
@@ -197,8 +195,8 @@ rule combine_vm:
   input:
     samples = config['sample_sheet'],
     vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location']),
-    rest = expand('output/{{project}}/{sid}/no_movement_events.csv', sid = samples['Location']),
-    move = expand('output/{{project}}/{sid}/events2.csv', sid = samples['Location'])
+    rest = expand('output/{{project}}/{sid}/no_movement_final.csv', sid = samples['Location']),
+    move = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location'])
   output:
     data = 'output/{project}/figures/combined_vm_data.csv'
   params:
@@ -209,7 +207,7 @@ rule combine_vm:
 rule combine_rest_info:
   input:
     samples = config['sample_sheet'],
-    data = expand('output/{{project}}/{sid}/no_movement_events.csv', sid = samples['Location'])
+    data = expand('output/{{project}}/{sid}/no_movement_final.csv', sid = samples['Location'])
   output:
     data = 'output/{project}/figures/combined_rest_information.csv'
   params:
@@ -220,8 +218,8 @@ rule combine_rest_info:
 rule ap_count:
   input:
     samples = config['sample_sheet'],
-    rest = expand('output/{{project}}/{sid}/no_movement_events.csv', sid = samples['Location']),
-    move = expand('output/{{project}}/{sid}/events2.csv', sid = samples['Location']),
+    rest = expand('output/{{project}}/{sid}/no_movement_final.csv', sid = samples['Location']),
+    move = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location']),
     vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
   output:
     data = 'output/{project}/figures/ap_count.csv'
@@ -234,7 +232,7 @@ rule event_data:
   input:
     samples = config['sample_sheet'],
     emg = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
-    movement = expand('output/{{project}}/{sid}/events2.csv', sid = samples['Location']),
+    movement = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location']),
     vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
   output:
     data = 'output/{project}/figures/event_data.csv'
@@ -260,17 +258,18 @@ rule figure1:
   input:
     emg_data = 'output/{project}/W1/C2/emg_data.csv',
     vm_data = 'output/{project}/W1/C2/vm_data.csv',
-    movement_information = 'output/{project}/W1/C2/events2.csv',
-    no_movement_information = 'output/{project}/W1/C2/no_movement_events.csv'
+    movement_information = 'output/{project}/W1/C2/movement_final.csv',
+    no_movement_information = 'output/{project}/W1/C2/no_movement_final.csv'
   output:
     png = '{project}/www/figure1.png'
   conda: 'env/r.yml'
   script: 'R/figures/figure1.R'
 
+# TODO: vector memory exhausted (limit reached?)
 rule figure2:
   input:
     sample_sheet = config['sample_sheet'],
-    movement_information = expand('output/{{project}}/{sid}/events2.csv', sid = samples['Location']),
+    movement_information = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location']),
     rest_information = 'output/{project}/figures/combined_rest_information.csv',
     vm = 'output/{project}/figures/combined_vm_data.csv',
     ap_count = 'output/{project}/figures/ap_count.csv'
