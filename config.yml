@@ -36,6 +36,8 @@ report:
     - vm
   supplementary:
     - figure1.png
-    - figure2.png
+#    TODO: fix figure 2, keeps breaking for some reason
+#    - figure2.png
     - figure3.png
     - figure4.png
+    - figure5.png

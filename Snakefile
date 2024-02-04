@@ -1,4 +1,5 @@
 import pandas as pd
+from snakemake.io import expand
 
 configfile: 'config.yml'
 
@@ -59,7 +60,7 @@ rule emg_filter:
 
 rule extract_emg_data:
   input:
-    data = 'output/{project}/{animal_id}/{cell_name}/emg/filter.pkl',
+    data = 'output/{project}/{animal_id}/{cell_name}/emg/filter.pkl'
   output:
     data = 'output/{project}/{animal_id}/{cell_name}/emg_data.csv'
   params:
@@ -71,7 +72,7 @@ rule extract_emg_data:
 
 rule extract_vm_data:
   input:
-    data = 'output/{project}/{animal_id}/{cell_name}/vm/filter.pkl',
+    data = 'output/{project}/{animal_id}/{cell_name}/vm/filter.pkl'
   output:
     data = 'output/{project}/{animal_id}/{cell_name}/vm_data.csv'
   params:
@@ -231,27 +232,55 @@ rule ap_count:
   conda: 'env/mne.yml'
   script: 'python/figures/ap_count.py'
 
-rule event_data:
+rule event_data_start:
   input:
     samples = config['sample_sheet'],
     emg = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
     movement = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location']),
     vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
   output:
-    data = 'output/{project}/figures/event_data.csv'
+    data = 'output/{project}/figures/event_data_start.csv'
   params:
     prefix = 'output/{project}'
   conda: 'env/mne.yml'
-  script: 'python/figures/event_data.py'
+  script: 'python/figures/event_data_start.py'
 
-# Takes painfully long :)
-rule ap_time:
+rule event_data_end:
   input:
-    all_events = 'output/{project}/figures/event_data.csv'
+    samples = config['sample_sheet'],
+    emg = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
+    movement = expand('output/{{project}}/{sid}/movement_end_final.csv', sid = samples['Location']),
+    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
   output:
-    data = 'output/{project}/figures/ap_time.csv'
+    data = 'output/{project}/figures/event_data_end.csv'
+  params:
+    prefix = 'output/{project}'
   conda: 'env/mne.yml'
-  script: 'python/figures/ap_time.py'
+  script: 'python/figures/event_data_end.py'
+
+rule ap_time_start:
+  input:
+    samples = config['sample_sheet'],
+    movement = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location']),
+    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
+  output:
+    data = 'output/{project}/figures/ap_time_start.csv'
+  params:
+    prefix = 'output/{project}'
+  conda: 'env/mne.yml'
+  script: 'python/figures/ap_time_start.py'
+
+rule ap_time_end:
+  input:
+    samples = config['sample_sheet'],
+    movement = expand('output/{{project}}/{sid}/movement_end_final.csv', sid = samples['Location']),
+    vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
+  output:
+    data = 'output/{project}/figures/ap_time_end.csv'
+  params:
+    prefix = 'output/{project}'
+  conda: 'env/mne.yml'
+  script: 'python/figures/ap_time_end.py'
 
 ######################################################################
 # Figures
@@ -283,8 +312,8 @@ rule figure2:
 
 rule figure3:
   input:
-    event_data = 'output/{project}/figures/event_data.csv',
-    ap_time = 'output/{project}/figures/ap_time.csv'
+    event_data = 'output/{project}/figures/event_data_start.csv',
+    ap_time = 'output/{project}/figures/ap_time_start.csv'
   output:
     png = '{project}/www/figure3.png'
   conda: 'env/r.yml'
@@ -292,8 +321,17 @@ rule figure3:
 
 rule figure4:
   input:
-    event_data = 'output/{project}/figures/event_data.csv'
+    event_data = 'output/{project}/figures/event_data_start.csv'
   output:
     png = '{project}/www/figure4.png'
   conda: 'env/r.yml'
   script: 'R/figures/figure4.R'
+
+rule figure5:
+  input:
+    event_data = 'output/{project}/figures/event_data_end.csv',
+    ap_time = 'output/{project}/figures/ap_time_end.csv'
+  output:
+    png = '{project}/www/figure5.png'
+  conda: 'env/r.yml'
+  script: 'R/figures/figure5.R'
