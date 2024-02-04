@@ -85,7 +85,10 @@ rule extract_events_move:
     data = 'output/{project}/{animal_id}/{cell_name}/emg_data.csv'
   output:
     all_events = 'output/{project}/{animal_id}/{cell_name}/movement_all.csv',
-    events = 'output/{project}/{animal_id}/{cell_name}/movement_final.csv'
+    # Events filtered by previous event ending some time before the start (good for analysing event onset)
+    events_start = 'output/{project}/{animal_id}/{cell_name}/movement_start_final.csv',
+    # Events filtered by next event starting some time after the end (good for analysing event offset)
+    events_end = 'output/{project}/{animal_id}/{cell_name}/movement_end_final.csv'
   params:
     tkeoThreshold = config['movement']['tkeoThreshold'],
     maxTimeApart = config['movement']['maxTimeApart'],
@@ -164,7 +167,7 @@ rule report_emg:
     data = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
     no_movement_filtered = expand('output/{{project}}/{sid}/no_movement_final.csv', sid = samples['Location']),
     movement = expand('output/{{project}}/{sid}/movement_all.csv', sid = samples['Location']),
-    movement_filtered = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location'])
+    movement_filtered = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location'])
   output:
     report = '{project}/emg.html'
   params:
@@ -178,7 +181,7 @@ rule report_vm:
   input:
     samples = config['sample_sheet'],
     data = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location']),
-    movement_filtered = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location'])
+    movement_filtered = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location'])
   output:
     report = '{project}/vm.html'
   params:
@@ -196,7 +199,7 @@ rule combine_vm:
     samples = config['sample_sheet'],
     vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location']),
     rest = expand('output/{{project}}/{sid}/no_movement_final.csv', sid = samples['Location']),
-    move = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location'])
+    move = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location'])
   output:
     data = 'output/{project}/figures/combined_vm_data.csv'
   params:
@@ -219,7 +222,7 @@ rule ap_count:
   input:
     samples = config['sample_sheet'],
     rest = expand('output/{{project}}/{sid}/no_movement_final.csv', sid = samples['Location']),
-    move = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location']),
+    move = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location']),
     vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
   output:
     data = 'output/{project}/figures/ap_count.csv'
@@ -232,7 +235,7 @@ rule event_data:
   input:
     samples = config['sample_sheet'],
     emg = expand('output/{{project}}/{sid}/emg/filter.pkl', sid = samples['Location']),
-    movement = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location']),
+    movement = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location']),
     vm = expand('output/{{project}}/{sid}/vm/filter.pkl', sid = samples['Location'])
   output:
     data = 'output/{project}/figures/event_data.csv'
@@ -258,7 +261,7 @@ rule figure1:
   input:
     emg_data = 'output/{project}/W1/C2/emg_data.csv',
     vm_data = 'output/{project}/W1/C2/vm_data.csv',
-    movement_information = 'output/{project}/W1/C2/movement_final.csv',
+    movement_information = 'output/{project}/W1/C2/movement_start_final.csv',
     no_movement_information = 'output/{project}/W1/C2/no_movement_final.csv'
   output:
     png = '{project}/www/figure1.png'
@@ -269,7 +272,7 @@ rule figure1:
 rule figure2:
   input:
     sample_sheet = config['sample_sheet'],
-    movement_information = expand('output/{{project}}/{sid}/movement_final.csv', sid = samples['Location']),
+    movement_information = expand('output/{{project}}/{sid}/movement_start_final.csv', sid = samples['Location']),
     rest_information = 'output/{project}/figures/combined_rest_information.csv',
     vm = 'output/{project}/figures/combined_vm_data.csv',
     ap_count = 'output/{project}/figures/ap_count.csv'

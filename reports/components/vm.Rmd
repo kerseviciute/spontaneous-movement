@@ -4,7 +4,7 @@
 prefix = f'{r.prefix}/{r.animalId}/{r.cellName}'
 
 data = pd.read_pickle(f'{prefix}/vm/filter.pkl')
-movement_events = pd.read_csv(f'{prefix}/movement_final.csv')
+movement_events = pd.read_csv(f'{prefix}/movement_start_final.csv')
 ```
 
 The Vm data were not filtered nor centered.

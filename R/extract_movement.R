@@ -73,6 +73,9 @@ for (channel in channels) {
     # Add information about the start of the next event
     .[ order(Start), PreviousEndedBefore := abs(shift(End, type = 'lag') - Start) ] %>%
     .[ is.na(PreviousEndedBefore), PreviousEndedBefore := Start ] %>%
+    # Add information about the end of the previous event
+    .[ order(Start), NextStartedAfter := abs(shift(Start, type = 'lead')) - End ] %>%
+    .[ is.na(NextStartedAfter), NextStartedAfter := 10.0 - End ] %>%
     .[ , Length := End - Start ]
 
   events[[ channel ]] <- channelEvents
@@ -86,14 +89,23 @@ events <- rbindlist(events) %>%
 
 fwrite(events, snakemake@output$all_events)
 
-finalEvents <- events %>%
+finalEventsStart <- events %>%
   .[ Length >= minLength ] %>%
   .[ Length <= maxLength ] %>%
   .[ PreviousEndedBefore > calmBeforeEvent ] %>%
   .[ , MovementID := make.names(1:.N) ] %>%
   .[ Amplitude > minAmplitude ]
 
-nrow(events)
-nrow(finalEvents)
+finalEventsEnd <- events %>%
+  .[ Length >= minLength ] %>%
+  .[ Length <= maxLength ] %>%
+  .[ NextStartedAfter > calmBeforeEvent ] %>%
+  .[ , MovementID := make.names(1:.N) ] %>%
+  .[ Amplitude > minAmplitude ]
 
-fwrite(finalEvents, snakemake@output$events)
+nrow(events)
+nrow(finalEventsStart)
+nrow(finalEventsEnd)
+
+fwrite(finalEventsStart, snakemake@output$events_start)
+fwrite(finalEventsEnd, snakemake@output$events_end)
