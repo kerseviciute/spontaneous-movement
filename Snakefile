@@ -335,3 +335,11 @@ rule figure5:
     png = '{project}/www/figure5.png'
   conda: 'env/r.yml'
   script: 'R/figures/figure5.R'
+
+rule figure6:
+  input:
+    event_data = 'output/{project}/figures/event_data_end.csv'
+  output:
+    png = '{project}/www/figure6.png'
+  conda: 'env/r.yml'
+  script: 'R/figures/figure6.R'
